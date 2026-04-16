@@ -9,13 +9,35 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    const initSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.warn('Session error, clearing:', error.message);
+          await supabase.auth.signOut();
+          setSession(null);
+        } else {
+          setSession(session);
+        }
+      } catch (err) {
+        console.warn('Auth init error, clearing session:', err);
+        try { await supabase.auth.signOut(); } catch (e) { /* ignore */ }
+        setSession(null);
+      }
       setLoading(false);
-    });
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+    initSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        setSession(null);
+      } else if (event === 'TOKEN_REFRESHED' && !newSession) {
+        // Refresh failed - clear session
+        setSession(null);
+      } else {
+        setSession(newSession);
+      }
     });
 
     return () => subscription.unsubscribe();

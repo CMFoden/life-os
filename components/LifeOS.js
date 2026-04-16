@@ -2,12 +2,38 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 
-const BG = '#F4F6F8', CARD = '#FFFFFF', BORDER = '#E6EAF0', MUTED = '#8E95A2', TEXT = '#1B2030', SUBTEXT = '#5A6070', TEAL = '#2AA198', SAGE = '#3DA07A', CORAL = '#E06856', PURPLE = '#8B6CC1', ROYAL = '#3366CC';
-const COLORS = { chloe: ROYAL, cameron: TEAL, shared: PURPLE, kids: '#E5A100', home: '#9CA3AF' };
+// ===========================================
+// CONSTANTS
+// ===========================================
+const BG = '#F4F6F8', CARD = '#FFFFFF', BORDER = '#E6EAF0', MUTED = '#8E95A2', TEXT = '#1B2030', SUBTEXT = '#5A6070', TEAL = '#2AA198', SAGE = '#3DA07A', CORAL = '#E06856', PURPLE = '#8B6CC1', ROYAL = '#3366CC', GOLD = '#E5A100';
+const COLORS = { chloe: ROYAL, cameron: TEAL, shared: PURPLE, kids: GOLD, home: '#9CA3AF' };
 const STATUS_CONFIG = { 'needs-love': { label: 'Needs love', emoji: '💛', color: CORAL, bg: '#FEF0ED', sort: 0 }, 'heads-up': { label: 'Heads up', emoji: '👀', color: PURPLE, bg: '#F3EFF8', sort: 1 }, handled: { label: 'Handled', color: SAGE, bg: '#EBF7F2', sort: 2 } };
+const STATUS_OPTIONS = ['needs-love', 'heads-up', 'handled'];
 const COOK_OPTIONS = ['Chloë', 'Cameron', 'Together', 'Takeout', 'Out', '—'];
+const OWNER_OPTIONS = ['Chloë', 'Cameron', 'Both', '—'];
 const AISLES = [{ id: 'fruit-veg', label: 'Fruit + Veg', emoji: '🥦' }, { id: 'dairy', label: 'Dairy', emoji: '🧀' }, { id: 'meat', label: 'Meat', emoji: '🥩' }, { id: 'bread', label: 'Bread', emoji: '🍞' }, { id: 'dry', label: 'Dry Goods', emoji: '🫘' }, { id: 'toiletries', label: 'Toiletries', emoji: '🧴' }, { id: 'household', label: 'Household', emoji: '🧹' }, { id: 'other', label: 'Other', emoji: '📦' }];
 
+const EXERCISE_TYPES = [
+  { id: 'chloe', label: 'Chloë', color: ROYAL },
+  { id: 'cameron', label: 'Cameron', color: TEAL },
+  { id: 'together', label: 'Together', color: PURPLE },
+];
+const SOCIAL_TYPES = [
+  { id: 'chloe', label: 'Chloë', color: ROYAL },
+  { id: 'cameron', label: 'Cameron', color: TEAL },
+  { id: 'tom', label: 'Tom', color: '#D49200' },
+  { id: 'luke', label: 'Luke', color: GOLD },
+  { id: 'c+c', label: 'C+C', color: PURPLE },
+  { id: 't+l', label: 'T+L', color: GOLD },
+  { id: 'family', label: 'Family', color: '#8B6CC1' },
+];
+const LOGISTICS_OPTIONS = ['—', 'Chloë', 'Cameron', 'Together', 'JP or Patrick', 'Other'];
+const LOGISTICS_COLORS = { '—': MUTED, 'Chloë': ROYAL, 'Cameron': TEAL, 'Together': PURPLE, 'JP or Patrick': '#D49200', 'Other': '#8E95A2' };
+
+
+// ===========================================
+// DEFAULT DATA
+// ===========================================
 const DEFAULT_REGISTRY = {
   home: { label: 'Home', emoji: '🏠', items: [
     { name: 'Cleaning', status: 'handled', owner: 'Chloë', rhythm: 'Mon/Wed/Thu', next: 'Mon 14 Apr', contacts: [{ name: 'Thandi', role: 'Cleaner', phone: '071 XXX XXXX' }], notes: 'Has keys. Mondays deep clean, Wed/Thu general.' },
@@ -94,38 +120,203 @@ const DEFAULT_WEEKLY = {
 const DEFAULT_MONTHLY = [{ id: 30, text: 'Washing powder', checked: false }, { id: 31, text: 'Olive oil', checked: false }, { id: 32, text: 'Cling wrap', checked: false }];
 const DEFAULT_TOBUY = [{ id: 40, text: 'Tom cricket whites (13-14)', checked: false }, { id: 41, text: 'Luke school shoes (UK 5)', checked: false }, { id: 42, text: "Cameron's mom gift", checked: false }, { id: 43, text: 'Dyson filters x2', checked: false }];
 
-const DEFAULT_SCHEDULE = {
-  thisWeek: [
-    { day: 'Sun 13', tags: [{ text: 'Boys from Kommetjie 3pm', color: COLORS.kids }, { text: 'Roast Chicken', color: COLORS.shared }] },
-    { day: 'Mon 14', tags: [{ text: 'School resumes', color: COLORS.kids }, { text: 'Cleaning', color: COLORS.home }, { text: 'Chloë gym 6am', color: COLORS.chloe }, { text: 'Pick-up: JP 3pm', color: COLORS.kids }, { text: 'Cameron cooks', color: COLORS.cameron }] },
-    { day: 'Tue 15', tags: [{ text: 'Tom maths 3:30', color: COLORS.kids }, { text: 'Pick-up: JP', color: COLORS.kids }, { text: 'C+C run 5:30am', color: COLORS.shared }, { text: 'Chloë cooks', color: COLORS.chloe }] },
-    { day: 'Wed 16', tags: [{ text: 'Cleaning', color: COLORS.home }, { text: 'Pool', color: COLORS.home }, { text: 'Pick-up: Patrick', color: COLORS.kids }, { text: 'Cameron gym', color: COLORS.cameron }, { text: 'Cameron cooks', color: COLORS.cameron }] },
-    { day: 'Thu 17', tags: [{ text: 'Cleaning', color: COLORS.home }, { text: 'Pick-up: JP', color: COLORS.kids }, { text: 'Chloë gym', color: COLORS.chloe }, { text: 'Chloë cooks', color: COLORS.chloe }] },
-    { day: 'Fri 18', tags: [{ text: 'Pick-up: Cameron', color: COLORS.cameron }, { text: 'Dinner Out 🍷', color: COLORS.shared }] },
-    { day: 'Sat 19', tags: [{ text: 'Luke cricket 8am', color: COLORS.kids }, { text: 'Garden', color: COLORS.home }, { text: 'C+C run 7am', color: COLORS.shared }, { text: 'Braai 🔥', color: COLORS.shared }] },
-    { day: 'Sun 20', tags: [{ text: 'Boys to Kommetjie 3pm', color: COLORS.kids }] },
-  ],
-  nextWeek: [
-    { day: 'Sun 20', tags: [{ text: 'No boys (Kommetjie)', color: COLORS.kids }] },
-    { day: 'Mon 21', tags: [{ text: 'Cleaning', color: COLORS.home }, { text: 'Chloë gym', color: COLORS.chloe }] },
-    { day: 'Tue 22', tags: [{ text: 'C+C run 5:30am', color: COLORS.shared }] },
-    { day: 'Wed 23', tags: [{ text: 'Cleaning', color: COLORS.home }, { text: 'Pool', color: COLORS.home }] },
-    { day: 'Thu 24', tags: [{ text: 'Cleaning', color: COLORS.home }, { text: 'Chloë gym', color: COLORS.chloe }] },
-    { day: 'Fri 25', tags: [{ text: 'Date night? 💃', color: COLORS.shared }] },
-    { day: 'Sat 26', tags: [{ text: 'Garden', color: COLORS.home }] },
-    { day: 'Sun 27', tags: [{ text: 'Boys back to Newlands 3pm', color: COLORS.kids }] },
-  ],
-};
+// Dynamic week view builder - aggregates data from all sources
+function buildWeekView(weekKey, { meals, exercise, socialSched, kidLogistics, custody, registry }) {
+  const today = new Date();
+  const dow = today.getDay();
+  const daysToMonday = dow === 0 ? -6 : 1 - dow;
+  const weekOffset = weekKey === 'nextWeek' ? 7 : 0;
+
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + daysToMonday + weekOffset);
+  monday.setHours(0, 0, 0, 0);
+
+  const dayFullNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const dayShortNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  const days = [];
+  const todayStr = new Date(today); todayStr.setHours(0, 0, 0, 0);
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const date = d.getDate();
+    const month = monthNames[d.getMonth()];
+    const dayShort = dayShortNames[i];
+    const dayFull = dayFullNames[i];
+    const isToday = d.getTime() === todayStr.getTime();
+    const label = `${dayShort} ${date}`;
+
+    const tags = [];
+
+    // 1. Custody handover
+    if (custody?.[weekKey]) {
+      const cd = custody[weekKey];
+      const thisLoc = cd[i]?.loc;
+      let prevLoc;
+      if (i === 0) {
+        prevLoc = weekKey === 'nextWeek' ? custody.thisWeek?.[6]?.loc : null;
+      } else {
+        prevLoc = cd[i - 1]?.loc;
+      }
+      if (thisLoc && prevLoc && thisLoc !== prevLoc) {
+        tags.push({ text: thisLoc === 'N' ? 'Boys from Kommetjie' : 'Boys to Kommetjie', color: COLORS.kids });
+      }
+    }
+
+    // 2. Meals (dinner + cook)
+    if (meals) {
+      const meal = meals.find(m => m.day === dayFull);
+      if (meal && meal.meal) {
+        tags.push({ text: `🍽️ ${meal.meal}`, color: COLORS.shared });
+        if (meal.who && meal.who !== '—') {
+          const cc = meal.who === 'Chloë' ? COLORS.chloe : meal.who === 'Cameron' ? COLORS.cameron : meal.who === 'Together' ? COLORS.shared : MUTED;
+          tags.push({ text: `${meal.who} cooks`, color: cc });
+        }
+      }
+    }
+
+    // 3. Exercise
+    if (exercise?.[weekKey]?.[i]) {
+      exercise[weekKey][i].entries.forEach(e => {
+        const tc = EXERCISE_TYPES.find(t => t.id === e.type);
+        if (tc) tags.push({ text: `${tc.label}: ${e.what}`, color: tc.color });
+      });
+    }
+
+    // 4. Social
+    if (socialSched?.[weekKey]?.[i]) {
+      socialSched[weekKey][i].entries.forEach(e => {
+        const tc = SOCIAL_TYPES.find(t => t.id === e.type);
+        if (tc) tags.push({ text: `${tc.label}: ${e.what}`, color: tc.color });
+      });
+    }
+
+    // 5. Kid logistics (Mon-Fri)
+    if (kidLogistics?.[weekKey]?.[i] && i < 5) {
+      const kl = kidLogistics[weekKey][i];
+      if (kl.dropoff && kl.dropoff !== '—') tags.push({ text: `Drop-off: ${kl.dropoff}`, color: COLORS.kids });
+      if (kl.pickup && kl.pickup !== '—') tags.push({ text: `Pick-up: ${kl.pickup}`, color: COLORS.kids });
+      if (kl.notes?.trim()) tags.push({ text: kl.notes, color: COLORS.kids });
+    }
+
+    // 6. Registry items matching this day (by date substring)
+    if (registry) {
+      const patterns = [`${dayShort} ${date}`, `${date} ${month}`, `${month} ${date}`];
+      Object.values(registry).forEach(cat => {
+        cat.items.forEach(item => {
+          if (!item.next) return;
+          if (patterns.some(p => item.next.includes(p))) {
+            tags.push({ text: item.name, color: COLORS.home });
+          }
+        });
+      });
+    }
+
+    days.push({ day: label, tags, isToday });
+  }
+
+  return days;
+}
+
 
 const DEFAULT_CUSTODY = {
-  thisWeek: [{ day: 'S', loc: 'N' }, { day: 'M', loc: 'N' }, { day: 'T', loc: 'N' }, { day: 'W', loc: 'N' }, { day: 'T', loc: 'N' }, { day: 'F', loc: 'N' }, { day: 'S', loc: 'N' }, { day: 'S', loc: 'K' }],
-  nextWeek: [{ day: 'S', loc: 'K' }, { day: 'M', loc: 'K' }, { day: 'T', loc: 'K' }, { day: 'W', loc: 'K' }, { day: 'T', loc: 'K' }, { day: 'F', loc: 'K' }, { day: 'S', loc: 'K' }, { day: 'S', loc: 'N' }],
+  thisWeek: [{ day: 'M', loc: 'N' }, { day: 'T', loc: 'N' }, { day: 'W', loc: 'N' }, { day: 'T', loc: 'N' }, { day: 'F', loc: 'N' }, { day: 'S', loc: 'N' }, { day: 'S', loc: 'K' }],
+  nextWeek: [{ day: 'M', loc: 'K' }, { day: 'T', loc: 'K' }, { day: 'W', loc: 'K' }, { day: 'T', loc: 'K' }, { day: 'F', loc: 'K' }, { day: 'S', loc: 'K' }, { day: 'S', loc: 'N' }],
 };
 
-// --- Supabase helpers ---
+const DEFAULT_EXERCISE = {
+  thisWeek: [
+    { day: 'Mon', date: '14', entries: [{ id: 1, type: 'chloe', what: 'Gym 6am' }] },
+    { day: 'Tue', date: '15', entries: [{ id: 2, type: 'together', what: 'Run 5:30am' }] },
+    { day: 'Wed', date: '16', entries: [{ id: 3, type: 'cameron', what: 'Gym 6am' }] },
+    { day: 'Thu', date: '17', entries: [{ id: 4, type: 'chloe', what: 'Gym 6am' }] },
+    { day: 'Fri', date: '18', entries: [] },
+    { day: 'Sat', date: '19', entries: [{ id: 5, type: 'together', what: 'Run 7am' }] },
+    { day: 'Sun', date: '20', entries: [] },
+  ],
+  nextWeek: [
+    { day: 'Mon', date: '21', entries: [{ id: 6, type: 'chloe', what: 'Gym 6am' }] },
+    { day: 'Tue', date: '22', entries: [{ id: 7, type: 'together', what: 'Run 5:30am' }] },
+    { day: 'Wed', date: '23', entries: [] },
+    { day: 'Thu', date: '24', entries: [{ id: 8, type: 'chloe', what: 'Gym 6am' }] },
+    { day: 'Fri', date: '25', entries: [] },
+    { day: 'Sat', date: '26', entries: [] },
+    { day: 'Sun', date: '27', entries: [] },
+  ],
+};
+
+const DEFAULT_SOCIAL_SCHED = {
+  thisWeek: [
+    { day: 'Mon', date: '14', entries: [] },
+    { day: 'Tue', date: '15', entries: [] },
+    { day: 'Wed', date: '16', entries: [] },
+    { day: 'Thu', date: '17', entries: [] },
+    { day: 'Fri', date: '18', entries: [{ id: 10, type: 'c+c', what: 'Dinner out 🍷' }] },
+    { day: 'Sat', date: '19', entries: [] },
+    { day: 'Sun', date: '20', entries: [] },
+  ],
+  nextWeek: [
+    { day: 'Mon', date: '21', entries: [] },
+    { day: 'Tue', date: '22', entries: [] },
+    { day: 'Wed', date: '23', entries: [] },
+    { day: 'Thu', date: '24', entries: [] },
+    { day: 'Fri', date: '25', entries: [{ id: 11, type: 'c+c', what: 'Date night? 💃' }] },
+    { day: 'Sat', date: '26', entries: [] },
+    { day: 'Sun', date: '27', entries: [] },
+  ],
+};
+
+const DEFAULT_KID_LOGISTICS = {
+  thisWeek: [
+    { day: 'Mon', date: '14', dropoff: '—', pickup: 'JP or Patrick', notes: '' },
+    { day: 'Tue', date: '15', dropoff: '—', pickup: 'JP or Patrick', notes: 'Tom maths 3:30' },
+    { day: 'Wed', date: '16', dropoff: '—', pickup: 'JP or Patrick', notes: '' },
+    { day: 'Thu', date: '17', dropoff: '—', pickup: 'JP or Patrick', notes: '' },
+    { day: 'Fri', date: '18', dropoff: '—', pickup: 'Cameron', notes: '' },
+  ],
+  nextWeek: [
+    { day: 'Mon', date: '21', dropoff: '—', pickup: '—', notes: 'Kommetjie week' },
+    { day: 'Tue', date: '22', dropoff: '—', pickup: '—', notes: '' },
+    { day: 'Wed', date: '23', dropoff: '—', pickup: '—', notes: '' },
+    { day: 'Thu', date: '24', dropoff: '—', pickup: '—', notes: '' },
+    { day: 'Fri', date: '25', dropoff: '—', pickup: '—', notes: '' },
+  ],
+};
+
+// ===========================================
+// SUPABASE HELPERS
+// ===========================================
 async function loadData(key, fallback) {
   const { data } = await supabase.from('app_data').select('value').eq('key', key).single();
-  if (data) return data.value;
+  if (data) {
+    // Migration: custody went from 8-day (Sun-Sun) to 7-day (Mon-Sun)
+    if (key === 'custody' && data.value?.thisWeek?.length === 8) {
+      const migrated = {
+        thisWeek: data.value.thisWeek.slice(1),
+        nextWeek: data.value.nextWeek.slice(1),
+      };
+      await saveData('custody', migrated);
+      return migrated;
+    }
+    // Migration: kid logistics "JP" or "Patrick" -> "JP or Patrick"
+    if (key === 'kid_logistics' && data.value?.thisWeek) {
+      let changed = false;
+      const migrate = (arr) => arr.map(d => {
+        const out = { ...d };
+        if (out.dropoff === 'JP' || out.dropoff === 'Patrick') { out.dropoff = 'JP or Patrick'; changed = true; }
+        if (out.pickup === 'JP' || out.pickup === 'Patrick') { out.pickup = 'JP or Patrick'; changed = true; }
+        return out;
+      });
+      const migrated = { thisWeek: migrate(data.value.thisWeek), nextWeek: migrate(data.value.nextWeek) };
+      if (changed) {
+        await saveData('kid_logistics', migrated);
+        return migrated;
+      }
+    }
+    return data.value;
+  }
   await supabase.from('app_data').insert({ key, value: fallback });
   return fallback;
 }
@@ -133,30 +324,106 @@ async function saveData(key, value) {
   await supabase.from('app_data').upsert({ key, value }, { onConflict: 'key' });
 }
 
-// --- Small UI components ---
+// ===========================================
+// SMALL UI COMPONENTS
+// ===========================================
 function StatusBadge({ status }) { const c = STATUS_CONFIG[status]; return <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 9px', borderRadius: 20, color: c.color, backgroundColor: c.bg, whiteSpace: 'nowrap' }}>{c.emoji} {c.label}</span>; }
 function Tag({ text, color }) { return <span style={{ display: 'inline-block', fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 6, background: color + '18', color, marginRight: 4, marginBottom: 3 }}>{text}</span>; }
 function Check({ item, onToggle, onRemove }) { return (<div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px' }}><div onClick={onToggle} style={{ width: 20, height: 20, borderRadius: 5, flexShrink: 0, cursor: 'pointer', border: item.checked ? 'none' : `2px solid ${BORDER}`, background: item.checked ? SAGE : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 12, fontWeight: 700 }}>{item.checked ? '✓' : ''}</div><span style={{ flex: 1, fontSize: 13, color: item.checked ? MUTED : TEXT, textDecoration: item.checked ? 'line-through' : 'none' }}>{item.text}</span><span onClick={onRemove} style={{ fontSize: 13, color: '#CDD1D9', cursor: 'pointer', padding: '0 4px' }}>×</span></div>); }
+function SectionTitle({ text, color }) { return <h3 style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: color || MUTED, fontWeight: 600, margin: '0 0 10px' }}>{text}</h3>; }
+function Pill({ label, active, color, onClick }) { return <button onClick={onClick} style={{ fontSize: 10, padding: '4px 10px', borderRadius: 6, border: `1px solid ${active ? color : BORDER}`, background: active ? color + '18' : CARD, color: active ? color : MUTED, cursor: 'pointer', fontWeight: 500 }}>{label}</button>; }
 
-function ItemRow({ item: init, onUpdate }) {
+function DateFormatTip() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ background: '#EBF0FA', border: `1px solid ${ROYAL}30`, borderRadius: 10, marginBottom: 14, overflow: 'hidden' }}>
+      <div onClick={() => setOpen(!open)} style={{ padding: '9px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
+        <span style={{ fontSize: 12, color: ROYAL, fontWeight: 500 }}>💡 Date format tip {open ? '' : '(tap)'}</span>
+        <span style={{ fontSize: 10, color: ROYAL, transform: open ? 'rotate(180deg)' : '', transition: 'transform 0.2s' }}>▼</span>
+      </div>
+      {open && (
+        <div style={{ padding: '0 12px 12px', fontSize: 12, color: SUBTEXT, lineHeight: 1.55 }}>
+          Items with a <strong>Next</strong> date auto-appear in your weekly view on Today tab. Use these formats:
+          <ul style={{ margin: '6px 0 0 0', paddingLeft: 18 }}>
+            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>15 Apr</code> or <code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Apr 15</code> — appears on that day</li>
+            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Tue 15 Apr</code> — also works</li>
+            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Jul 2026</code>, <code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Expires 2028</code> — shown as-is in the item, no auto-day matching</li>
+          </ul>
+          <div style={{ marginTop: 6, fontStyle: 'italic', color: MUTED, fontSize: 11 }}>Avoid: "Monday 14 April 2026", "next Tuesday", "April"</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===========================================
+// REGISTRY ITEM ROW (Full Editability)
+// ===========================================
+function ItemRow({ item: init, onUpdate, onDelete }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [item, setItem] = useState(init);
-  const [editDetails, setEditDetails] = useState({});
-  const [editNotes, setEditNotes] = useState('');
-  const startEdit = () => { setEditing(true); setEditDetails(item.details ? { ...item.details } : {}); setEditNotes(item.notes || ''); };
+  const [draft, setDraft] = useState({});
+  const [showDelete, setShowDelete] = useState(false);
+  const [addingContact, setAddingContact] = useState(false);
+  const [newContact, setNewContact] = useState({ name: '', role: '', phone: '' });
+
+  const startEdit = () => {
+    setEditing(true);
+    setDraft({
+      name: item.name || '', owner: item.owner || '', rhythm: item.rhythm || '', next: item.next || '',
+      notes: item.notes || '', action: item.action || '',
+      details: item.details ? { ...item.details } : {},
+    });
+  };
+
   const saveEdit = () => {
-    const updated = { ...item, details: Object.keys(editDetails).length > 0 ? editDetails : item.details, notes: editNotes || item.notes };
+    const updated = { ...item, name: draft.name, owner: draft.owner, rhythm: draft.rhythm, next: draft.next, notes: draft.notes, action: draft.action || undefined, details: Object.keys(draft.details).length > 0 ? draft.details : item.details };
     setItem(updated); setEditing(false); if (onUpdate) onUpdate(updated);
   };
-  const markDone = () => { const updated = { ...item, status: 'handled' }; setItem(updated); if (onUpdate) onUpdate(updated); };
+
+  const setStatus = (s) => { const updated = { ...item, status: s }; setItem(updated); if (onUpdate) onUpdate(updated); };
+
+  const removeContact = (idx) => {
+    const updated = { ...item, contacts: item.contacts.filter((_, i) => i !== idx) };
+    if (updated.contacts.length === 0) delete updated.contacts;
+    setItem(updated); if (onUpdate) onUpdate(updated);
+  };
+
+  const addContact = () => {
+    if (!newContact.name.trim()) return;
+    const contacts = [...(item.contacts || []), { ...newContact }];
+    const updated = { ...item, contacts };
+    setItem(updated); if (onUpdate) onUpdate(updated);
+    setNewContact({ name: '', role: '', phone: '' }); setAddingContact(false);
+  };
+
+  const removeDoc = (idx) => {
+    const updated = { ...item, docs: item.docs.filter((_, i) => i !== idx) };
+    if (updated.docs.length === 0) delete updated.docs;
+    setItem(updated); if (onUpdate) onUpdate(updated);
+  };
+
+  const addDetail = () => {
+    const key = prompt('Detail name (e.g. "brand", "model"):');
+    if (!key) return;
+    const val = prompt('Value:');
+    if (val === null) return;
+    const details = { ...(item.details || {}), [key]: val };
+    const updated = { ...item, details };
+    setItem(updated); if (onUpdate) onUpdate(updated);
+  };
+
   const hasRich = item.contacts || item.docs || item.links || item.details || item.notes;
+  const inputStyle = { flex: 1, padding: '6px 10px', borderRadius: 6, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, outline: 'none', fontFamily: "'Outfit', sans-serif" };
+  const labelStyle = { fontSize: 11, color: MUTED, width: 60, flexShrink: 0, fontWeight: 500 };
+
   return (
     <div style={{ background: CARD, borderRadius: 14, marginBottom: 8, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
       <div onClick={() => setOpen(!open)} style={{ padding: '13px 16px', cursor: 'pointer' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ fontSize: 14, color: TEXT, fontWeight: 500 }}>{item.name}</span><StatusBadge status={item.status} /></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}><span style={{ fontSize: 14, color: TEXT, fontWeight: 500 }}>{item.name}</span><StatusBadge status={item.status} /></div>
             <div style={{ fontSize: 12, color: MUTED, marginTop: 3 }}>{item.owner} · {item.rhythm} · {item.next}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -167,21 +434,42 @@ function ItemRow({ item: init, onUpdate }) {
       </div>
       {open && (
         <div style={{ padding: '0 16px 16px', borderTop: `1px solid ${BORDER}`, paddingTop: 14 }}>
+          {/* Status buttons */}
+          <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
+            {STATUS_OPTIONS.map((s) => (<button key={s} onClick={(e) => { e.stopPropagation(); setStatus(s); }} style={{ fontSize: 10, padding: '4px 10px', borderRadius: 20, border: item.status === s ? 'none' : `1px solid ${BORDER}`, background: item.status === s ? STATUS_CONFIG[s].bg : 'transparent', color: STATUS_CONFIG[s].color, cursor: 'pointer', fontWeight: 500 }}>{STATUS_CONFIG[s].emoji} {STATUS_CONFIG[s].label}</button>))}
+          </div>
+
           {!editing ? (<>
             {item.notes && <p style={{ fontSize: 13, color: SUBTEXT, lineHeight: 1.5, margin: '0 0 12px' }}>{item.notes}</p>}
-            {item.details && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>{Object.entries(item.details).map(([k, v]) => (<div key={k} style={{ fontSize: 11, color: SUBTEXT, background: BG, padding: '4px 10px', borderRadius: 6, border: `1px solid ${BORDER}` }}><span style={{ color: MUTED, textTransform: 'capitalize' }}>{k.replace(/([A-Z])/g, ' $1').trim()}:</span> {v}</div>))}</div>}
-            {item.contacts && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Contacts</div>{item.contacts.map((c, i) => (<div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 0' }}><div><span style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{c.name}</span><span style={{ fontSize: 12, color: MUTED, marginLeft: 6 }}>{c.role}</span></div><a href={`tel:${c.phone}`} style={{ fontSize: 12, color: ROYAL, textDecoration: 'none', fontWeight: 500 }}>📞 {c.phone}</a></div>))}</div>}
-            {item.docs && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Documents</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{item.docs.map((d, i) => <span key={i} style={{ fontSize: 12, color: SUBTEXT, background: BG, padding: '5px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, cursor: 'pointer' }}>📎 {d}</span>)}</div></div>}
+            {item.details && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>{Object.entries(item.details).map(([k, v]) => (<div key={k} style={{ fontSize: 11, color: SUBTEXT, background: BG, padding: '4px 10px', borderRadius: 6, border: `1px solid ${BORDER}` }}><span style={{ color: MUTED, textTransform: 'capitalize' }}>{k.replace(/([A-Z])/g, ' $1').trim()}:</span> {v}</div>))}<button onClick={addDetail} style={{ fontSize: 11, color: ROYAL, background: 'transparent', border: `1px dashed ${BORDER}`, borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}>+ detail</button></div>}
+            {item.contacts && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Contacts</div>{item.contacts.map((c, i) => (<div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 0' }}><div><span style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{c.name}</span><span style={{ fontSize: 12, color: MUTED, marginLeft: 6 }}>{c.role}</span></div><div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><a href={`tel:${c.phone}`} style={{ fontSize: 12, color: ROYAL, textDecoration: 'none', fontWeight: 500 }}>📞 {c.phone}</a><span onClick={() => removeContact(i)} style={{ fontSize: 12, color: '#CDD1D9', cursor: 'pointer' }}>×</span></div></div>))}{!addingContact && <button onClick={() => setAddingContact(true)} style={{ fontSize: 11, color: ROYAL, background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', fontWeight: 500 }}>+ Add contact</button>}{addingContact && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}><input placeholder="Name" value={newContact.name} onChange={(e) => setNewContact(p => ({ ...p, name: e.target.value }))} style={{ ...inputStyle, flex: '1 1 80px' }} /><input placeholder="Role" value={newContact.role} onChange={(e) => setNewContact(p => ({ ...p, role: e.target.value }))} style={{ ...inputStyle, flex: '1 1 60px' }} /><input placeholder="Phone" value={newContact.phone} onChange={(e) => setNewContact(p => ({ ...p, phone: e.target.value }))} style={{ ...inputStyle, flex: '1 1 80px' }} /><button onClick={addContact} style={{ fontSize: 11, padding: '6px 12px', borderRadius: 6, border: 'none', background: SAGE, color: 'white', cursor: 'pointer' }}>Add</button><button onClick={() => setAddingContact(false)} style={{ fontSize: 11, padding: '6px 8px', borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: MUTED }}>×</button></div>}</div>}
+            {!item.contacts && <div style={{ marginBottom: 8 }}><button onClick={() => setAddingContact(true)} style={{ fontSize: 11, color: ROYAL, background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 0', fontWeight: 500 }}>+ Add contact</button>{addingContact && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}><input placeholder="Name" value={newContact.name} onChange={(e) => setNewContact(p => ({ ...p, name: e.target.value }))} style={{ ...inputStyle, flex: '1 1 80px' }} /><input placeholder="Role" value={newContact.role} onChange={(e) => setNewContact(p => ({ ...p, role: e.target.value }))} style={{ ...inputStyle, flex: '1 1 60px' }} /><input placeholder="Phone" value={newContact.phone} onChange={(e) => setNewContact(p => ({ ...p, phone: e.target.value }))} style={{ ...inputStyle, flex: '1 1 80px' }} /><button onClick={addContact} style={{ fontSize: 11, padding: '6px 12px', borderRadius: 6, border: 'none', background: SAGE, color: 'white', cursor: 'pointer' }}>Add</button><button onClick={() => setAddingContact(false)} style={{ fontSize: 11, padding: '6px 8px', borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: MUTED }}>×</button></div>}</div>}
+            {item.docs && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Documents</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{item.docs.map((d, i) => <span key={i} style={{ fontSize: 12, color: SUBTEXT, background: BG, padding: '5px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>📎 {d}<span onClick={() => removeDoc(i)} style={{ color: '#CDD1D9', cursor: 'pointer', fontSize: 10, marginLeft: 2 }}>×</span></span>)}</div></div>}
             {item.links && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>{item.links.map((l, i) => <span key={i} style={{ fontSize: 12, color: ROYAL, background: '#EBF0FA', padding: '5px 10px', borderRadius: 8, cursor: 'pointer', fontWeight: 500 }}>🔗 {l.label}</span>)}</div>}
             <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
               {item.action && <button style={{ fontSize: 12, padding: '7px 16px', borderRadius: 9, border: 'none', cursor: 'pointer', fontWeight: 500, background: TEXT, color: 'white', display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ fontSize: 11 }}>🤖</span> {item.action}</button>}
               <button onClick={(e) => { e.stopPropagation(); startEdit(); }} style={{ fontSize: 12, padding: '7px 16px', borderRadius: 9, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: ROYAL, fontWeight: 500 }}>✏️ Edit</button>
-              <button onClick={(e) => { e.stopPropagation(); markDone(); }} style={{ fontSize: 12, padding: '7px 16px', borderRadius: 9, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: SUBTEXT }}>Done ✓</button>
+              {!showDelete ? (
+                <button onClick={(e) => { e.stopPropagation(); setShowDelete(true); }} style={{ fontSize: 12, padding: '7px 16px', borderRadius: 9, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: MUTED }}>🗑️</button>
+              ) : (
+                <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, color: CORAL }}>Delete?</span>
+                  <button onClick={(e) => { e.stopPropagation(); if (onDelete) onDelete(); }} style={{ fontSize: 11, padding: '5px 10px', borderRadius: 6, border: 'none', background: CORAL, color: 'white', cursor: 'pointer' }}>Yes</button>
+                  <button onClick={(e) => { e.stopPropagation(); setShowDelete(false); }} style={{ fontSize: 11, padding: '5px 10px', borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: MUTED }}>No</button>
+                </div>
+              )}
             </div>
           </>) : (<>
-            <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Notes</div><textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={3} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, resize: 'vertical', outline: 'none', boxSizing: 'border-box' }} /></div>
-            {Object.keys(editDetails).length > 0 && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Details</div>{Object.entries(editDetails).map(([k, v]) => (<div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}><label style={{ fontSize: 12, color: SUBTEXT, width: 90, textTransform: 'capitalize', flexShrink: 0 }}>{k.replace(/([A-Z])/g, ' $1').trim()}</label><input value={v} onChange={(e) => setEditDetails((p) => ({ ...p, [k]: e.target.value }))} style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, outline: 'none' }} /></div>))}</div>}
-            <div style={{ display: 'flex', gap: 8 }}><button onClick={saveEdit} style={{ fontSize: 12, padding: '7px 20px', borderRadius: 9, border: 'none', background: SAGE, color: 'white', cursor: 'pointer', fontWeight: 500 }}>Save</button><button onClick={() => setEditing(false)} style={{ fontSize: 12, padding: '7px 16px', borderRadius: 9, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: SUBTEXT }}>Cancel</button></div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Name</span><input value={draft.name} onChange={(e) => setDraft(p => ({ ...p, name: e.target.value }))} style={inputStyle} /></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Owner</span><div style={{ display: 'flex', gap: 4 }}>{OWNER_OPTIONS.map(o => <Pill key={o} label={o} active={draft.owner === o} color={o === 'Chloë' ? ROYAL : o === 'Cameron' ? TEAL : o === 'Both' ? PURPLE : MUTED} onClick={() => setDraft(p => ({ ...p, owner: o }))} />)}</div></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Rhythm</span><input value={draft.rhythm} onChange={(e) => setDraft(p => ({ ...p, rhythm: e.target.value }))} style={inputStyle} placeholder="e.g. Weekly, Annually" /></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Next</span><input value={draft.next} onChange={(e) => setDraft(p => ({ ...p, next: e.target.value }))} style={inputStyle} placeholder="e.g. 15 Apr, Tue 15 Apr, Jul 2026" /></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Action</span><input value={draft.action} onChange={(e) => setDraft(p => ({ ...p, action: e.target.value }))} style={inputStyle} placeholder="e.g. Book appointment" /></div>
+            </div>
+            <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Notes</div><textarea value={draft.notes} onChange={(e) => setDraft(p => ({ ...p, notes: e.target.value }))} rows={3} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, resize: 'vertical', outline: 'none', boxSizing: 'border-box', fontFamily: "'Outfit', sans-serif" }} /></div>
+            {Object.keys(draft.details).length > 0 && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Details</div>{Object.entries(draft.details).map(([k, v]) => (<div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}><label style={{ fontSize: 12, color: SUBTEXT, width: 90, textTransform: 'capitalize', flexShrink: 0 }}>{k.replace(/([A-Z])/g, ' $1').trim()}</label><input value={v} onChange={(e) => setDraft(p => ({ ...p, details: { ...p.details, [k]: e.target.value } }))} style={inputStyle} /></div>))}</div>}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button onClick={saveEdit} style={{ fontSize: 12, padding: '7px 20px', borderRadius: 9, border: 'none', background: SAGE, color: 'white', cursor: 'pointer', fontWeight: 500 }}>Save</button><button onClick={() => setEditing(false)} style={{ fontSize: 12, padding: '7px 16px', borderRadius: 9, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: SUBTEXT }}>Cancel</button>{!showDelete ? (<button onClick={(e) => { e.stopPropagation(); setShowDelete(true); }} style={{ fontSize: 12, padding: '7px 14px', borderRadius: 9, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: CORAL, marginLeft: 'auto' }}>🗑️ Delete</button>) : (<div style={{ display: 'flex', gap: 4, alignItems: 'center', marginLeft: 'auto' }}><span style={{ fontSize: 11, color: CORAL }}>Delete?</span><button onClick={(e) => { e.stopPropagation(); if (onDelete) onDelete(); }} style={{ fontSize: 11, padding: '5px 10px', borderRadius: 6, border: 'none', background: CORAL, color: 'white', cursor: 'pointer' }}>Yes</button><button onClick={(e) => { e.stopPropagation(); setShowDelete(false); }} style={{ fontSize: 11, padding: '5px 10px', borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: MUTED }}>No</button></div>)}</div>
           </>)}
         </div>
       )}
@@ -189,23 +477,225 @@ function ItemRow({ item: init, onUpdate }) {
   );
 }
 
+// ===========================================
+// ADD ITEM FORM
+// ===========================================
+function AddItemForm({ onAdd }) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState({ name: '', owner: 'Chloë', rhythm: '', next: '', status: 'handled', notes: '' });
+  const inputStyle = { flex: 1, padding: '8px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, outline: 'none', fontFamily: "'Outfit', sans-serif" };
+  const labelStyle = { fontSize: 11, color: MUTED, width: 60, flexShrink: 0, fontWeight: 500 };
+
+  const submit = () => {
+    if (!draft.name.trim()) return;
+    onAdd({ ...draft, name: draft.name.trim() });
+    setDraft({ name: '', owner: 'Chloë', rhythm: '', next: '', status: 'handled', notes: '' });
+    setOpen(false);
+  };
+
+  if (!open) return <button onClick={() => setOpen(true)} style={{ width: '100%', padding: '12px', borderRadius: 12, border: `1.5px dashed ${BORDER}`, background: 'transparent', cursor: 'pointer', color: ROYAL, fontSize: 13, fontWeight: 500, marginTop: 4 }}>+ Add item</button>;
+
+  return (
+    <div style={{ background: CARD, borderRadius: 14, padding: 16, border: `1px solid ${ROYAL}40`, marginTop: 4 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Name</span><input value={draft.name} onChange={(e) => setDraft(p => ({ ...p, name: e.target.value }))} style={inputStyle} placeholder="e.g. Dentist check-up" autoFocus /></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Owner</span><div style={{ display: 'flex', gap: 4 }}>{OWNER_OPTIONS.map(o => <Pill key={o} label={o} active={draft.owner === o} color={o === 'Chloë' ? ROYAL : o === 'Cameron' ? TEAL : o === 'Both' ? PURPLE : MUTED} onClick={() => setDraft(p => ({ ...p, owner: o }))} />)}</div></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Status</span><div style={{ display: 'flex', gap: 4 }}>{STATUS_OPTIONS.map(s => <Pill key={s} label={STATUS_CONFIG[s].label} active={draft.status === s} color={STATUS_CONFIG[s].color} onClick={() => setDraft(p => ({ ...p, status: s }))} />)}</div></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Rhythm</span><input value={draft.rhythm} onChange={(e) => setDraft(p => ({ ...p, rhythm: e.target.value }))} style={inputStyle} placeholder="e.g. Annually, Weekly" /></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Next</span><input value={draft.next} onChange={(e) => setDraft(p => ({ ...p, next: e.target.value }))} style={inputStyle} placeholder="e.g. 15 Apr, Tue 15 Apr, Jul 2026" /></div>
+        <textarea value={draft.notes} onChange={(e) => setDraft(p => ({ ...p, notes: e.target.value }))} rows={2} placeholder="Notes (optional)" style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, resize: 'vertical', outline: 'none', boxSizing: 'border-box', fontFamily: "'Outfit', sans-serif" }} />
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <button onClick={submit} style={{ fontSize: 12, padding: '8px 20px', borderRadius: 9, border: 'none', background: SAGE, color: 'white', cursor: 'pointer', fontWeight: 600 }}>Add item</button>
+        <button onClick={() => setOpen(false)} style={{ fontSize: 12, padding: '8px 16px', borderRadius: 9, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: SUBTEXT }}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
+// ===========================================
+// SCHEDULE & CUSTODY COMPONENTS
+// ===========================================
 function ScheduleCard({ days, startCollapsed }) {
   const [collapsed, setCollapsed] = useState(startCollapsed);
   const shown = collapsed ? days.slice(0, 3) : days;
   return (
     <div style={{ background: CARD, borderRadius: 14, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
-      {shown.map((d, i) => (<div key={i} style={{ display: 'flex', gap: 12, padding: '10px 14px', borderBottom: `1px solid ${BORDER}`, alignItems: 'flex-start' }}><span style={{ width: 52, fontSize: 12, fontWeight: 600, color: SUBTEXT, flexShrink: 0, paddingTop: 3 }}>{d.day}</span><div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: 3 }}>{d.tags.map((t, j) => <Tag key={j} text={t.text} color={t.color} />)}</div></div>))}
+      {shown.map((d, i) => (<div key={i} style={{ display: 'flex', gap: 12, padding: '10px 14px', borderBottom: `1px solid ${BORDER}`, alignItems: 'flex-start', background: d.isToday ? '#EBF0FA' : 'transparent' }}><span style={{ width: 52, fontSize: 12, fontWeight: d.isToday ? 700 : 600, color: d.isToday ? ROYAL : SUBTEXT, flexShrink: 0, paddingTop: 3 }}>{d.day}{d.isToday && <span style={{ fontSize: 8, display: 'block', marginTop: 1 }}>TODAY</span>}</span><div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: 3 }}>{d.tags.length === 0 ? <span style={{ fontSize: 11, color: '#CDD1D9', fontStyle: 'italic' }}>—</span> : d.tags.map((t, j) => <Tag key={j} text={t.text} color={t.color} />)}</div></div>))}
       {collapsed && <div onClick={() => setCollapsed(false)} style={{ padding: '9px 14px', textAlign: 'center', cursor: 'pointer', fontSize: 12, color: ROYAL, fontWeight: 500 }}>Show full week ↓</div>}
       {!collapsed && startCollapsed && <div onClick={() => setCollapsed(true)} style={{ padding: '9px 14px', textAlign: 'center', cursor: 'pointer', fontSize: 12, color: MUTED, fontWeight: 500 }}>Collapse ↑</div>}
     </div>
   );
 }
 
-function CustodyStrip({ days, label }) {
-  return (<div><div style={{ fontSize: 10, color: MUTED, fontWeight: 500, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div><div style={{ display: 'flex', gap: 2, background: BG, borderRadius: 10, padding: 3, border: `1px solid ${BORDER}` }}>{days.map((d, i) => { const isN = d.loc === 'N'; return (<div key={i} style={{ flex: 1, textAlign: 'center', padding: '7px 0', borderRadius: 7, background: isN ? ROYAL : 'transparent', color: isN ? 'white' : MUTED }}><div style={{ fontSize: 10, fontWeight: 600 }}>{d.day}</div><div style={{ fontSize: 7, marginTop: 1, opacity: 0.85 }}>{isN ? 'NWL' : 'KOM'}</div></div>); })}</div><div style={{ fontSize: 9, color: MUTED, marginTop: 4, fontStyle: 'italic', textAlign: 'center' }}>Synced from Google Sheet</div></div>);
+function CustodyStrip({ days, label, onToggle }) {
+  return (<div>{label && <div style={{ fontSize: 10, color: MUTED, fontWeight: 500, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>}<div style={{ display: 'flex', gap: 2, background: BG, borderRadius: 10, padding: 3, border: `1px solid ${BORDER}` }}>{days.map((d, i) => { const isN = d.loc === 'N'; return (<div key={i} onClick={() => onToggle && onToggle(i)} style={{ flex: 1, textAlign: 'center', padding: '7px 0', borderRadius: 7, background: isN ? ROYAL : 'transparent', color: isN ? 'white' : MUTED, cursor: onToggle ? 'pointer' : 'default' }}><div style={{ fontSize: 10, fontWeight: 600 }}>{d.day}</div><div style={{ fontSize: 7, marginTop: 1, opacity: 0.85 }}>{isN ? 'NWL' : 'KOM'}</div></div>); })}</div>{onToggle && <div style={{ fontSize: 9, color: MUTED, marginTop: 4, fontStyle: 'italic', textAlign: 'center' }}>Tap a day to toggle</div>}</div>);
 }
 
-// --- Lists Tab ---
+// ===========================================
+// SCHEDULES TAB (NEW)
+// ===========================================
+function SchedulesTab({ exercise, setExercise, saveExercise, socialSched, setSocialSched, saveSocialSched, kidLogistics, setKidLogistics, saveKidLogistics, custody, setCustody, saveCustody }) {
+  const [weekView, setWeekView] = useState('thisWeek');
+  const [section, setSection] = useState('exercise');
+  const [addingTo, setAddingTo] = useState(null); // { dayIdx }
+  const [addType, setAddType] = useState('');
+  const [addWhat, setAddWhat] = useState('');
+  const [editingLogistics, setEditingLogistics] = useState(null); // { dayIdx, field }
+
+  const weekLabel = weekView === 'thisWeek' ? 'This week' : 'Next week';
+  const exDays = exercise?.[weekView] || [];
+  const soDays = socialSched?.[weekView] || [];
+  const klDays = kidLogistics?.[weekView] || [];
+  const types = section === 'exercise' ? EXERCISE_TYPES : SOCIAL_TYPES;
+
+  const typeColor = (t) => {
+    const found = [...EXERCISE_TYPES, ...SOCIAL_TYPES].find(x => x.id === t);
+    return found ? found.color : MUTED;
+  };
+  const typeLabel = (t) => {
+    const found = [...EXERCISE_TYPES, ...SOCIAL_TYPES].find(x => x.id === t);
+    return found ? found.label : t;
+  };
+
+  // Exercise / Social entry management
+  const addEntry = (dayIdx) => {
+    if (!addType || !addWhat.trim()) return;
+    const source = section === 'exercise' ? exercise : socialSched;
+    const setter = section === 'exercise' ? setExercise : setSocialSched;
+    const saver = section === 'exercise' ? saveExercise : saveSocialSched;
+    const updated = { ...source };
+    updated[weekView] = updated[weekView].map((d, i) => i === dayIdx ? { ...d, entries: [...d.entries, { id: Date.now(), type: addType, what: addWhat.trim() }] } : d);
+    setter(updated); saver(updated);
+    setAddingTo(null); setAddType(''); setAddWhat('');
+  };
+
+  const removeEntry = (dayIdx, entryId) => {
+    const source = section === 'exercise' ? exercise : socialSched;
+    const setter = section === 'exercise' ? setExercise : setSocialSched;
+    const saver = section === 'exercise' ? saveExercise : saveSocialSched;
+    const updated = { ...source };
+    updated[weekView] = updated[weekView].map((d, i) => i === dayIdx ? { ...d, entries: d.entries.filter(e => e.id !== entryId) } : d);
+    setter(updated); saver(updated);
+  };
+
+  // Kid logistics
+  const cycleLogistics = (dayIdx, field) => {
+    const updated = { ...kidLogistics };
+    const current = updated[weekView][dayIdx][field];
+    const currentIdx = LOGISTICS_OPTIONS.indexOf(current);
+    const nextIdx = (currentIdx + 1) % LOGISTICS_OPTIONS.length;
+    updated[weekView] = updated[weekView].map((d, i) => i === dayIdx ? { ...d, [field]: LOGISTICS_OPTIONS[nextIdx] } : d);
+    setKidLogistics(updated); saveKidLogistics(updated);
+  };
+
+  const updateLogisticsNotes = (dayIdx, notes) => {
+    const updated = { ...kidLogistics };
+    updated[weekView] = updated[weekView].map((d, i) => i === dayIdx ? { ...d, notes } : d);
+    setKidLogistics(updated); saveKidLogistics(updated);
+  };
+
+  // Custody toggle
+  const toggleCustody = (week, idx) => {
+    const updated = { ...custody };
+    updated[week] = updated[week].map((d, i) => i === idx ? { ...d, loc: d.loc === 'N' ? 'K' : 'N' } : d);
+    setCustody(updated); saveCustody(updated);
+  };
+
+  return (<>
+    {/* Week toggle */}
+    <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+      {['thisWeek', 'nextWeek'].map(w => (
+        <button key={w} onClick={() => setWeekView(w)} style={{ flex: 1, padding: '10px', borderRadius: 10, border: `1px solid ${BORDER}`, background: weekView === w ? TEXT : CARD, color: weekView === w ? 'white' : SUBTEXT, cursor: 'pointer', fontSize: 12, fontWeight: 500 }}>{w === 'thisWeek' ? '📅 This week' : '📅 Next week'}</button>
+      ))}
+    </div>
+
+    {/* Custody strip - matches week toggle */}
+    {custody && <div style={{ marginBottom: 20 }}>
+      <SectionTitle text={`👦 Boys · ${weekLabel}`} />
+      <CustodyStrip days={custody[weekView]} label="" onToggle={(i) => toggleCustody(weekView, i)} />
+    </div>}
+
+    {/* Section tabs */}
+    <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+      {[{ id: 'exercise', l: 'Exercise', e: '🏋️' }, { id: 'social', l: 'Social', e: '🎉' }, { id: 'logistics', l: 'Kids', e: '🚗' }].map(t => (
+        <button key={t.id} onClick={() => { setSection(t.id); setAddingTo(null); }} style={{ flex: 1, padding: '10px 6px', borderRadius: 10, border: `1px solid ${BORDER}`, background: section === t.id ? TEXT : CARD, color: section === t.id ? 'white' : SUBTEXT, cursor: 'pointer', fontSize: 12, fontWeight: 500 }}>{t.e} {t.l}</button>
+      ))}
+    </div>
+
+    {/* Exercise / Social schedule */}
+    {(section === 'exercise' || section === 'social') && (<>
+      <div style={{ background: CARD, borderRadius: 14, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
+        {(section === 'exercise' ? exDays : soDays).map((day, di) => (
+          <div key={di} style={{ padding: '10px 14px', borderBottom: `1px solid ${BORDER}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: day.entries.length > 0 ? 6 : 0 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: SUBTEXT, width: 60 }}>{day.day} {day.date}</span>
+              {day.entries.length === 0 && addingTo?.dayIdx !== di && <span style={{ fontSize: 11, color: '#CDD1D9' }}>—</span>}
+              <button onClick={() => { setAddingTo({ dayIdx: di }); setAddType(types[0]?.id || ''); setAddWhat(''); }} style={{ fontSize: 10, color: ROYAL, background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 500, padding: '2px 6px' }}>+</button>
+            </div>
+            {day.entries.map((e) => (
+              <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, marginLeft: 60 }}>
+                <Tag text={`${typeLabel(e.type)}: ${e.what}`} color={typeColor(e.type)} />
+                <span onClick={() => removeEntry(di, e.id)} style={{ fontSize: 11, color: '#CDD1D9', cursor: 'pointer' }}>×</span>
+              </div>
+            ))}
+            {addingTo?.dayIdx === di && (
+              <div style={{ display: 'flex', gap: 4, marginTop: 6, marginLeft: 60, flexWrap: 'wrap' }}>
+                <select value={addType} onChange={(e) => setAddType(e.target.value)} style={{ padding: '5px 6px', borderRadius: 6, border: `1px solid ${BORDER}`, fontSize: 11, color: SUBTEXT, background: CARD }}>
+                  {types.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                </select>
+                <input value={addWhat} onChange={(e) => setAddWhat(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addEntry(di)} placeholder="e.g. Gym 6am" style={{ flex: 1, padding: '5px 8px', borderRadius: 6, border: `1px solid ${BORDER}`, fontSize: 12, outline: 'none', minWidth: 80 }} autoFocus />
+                <button onClick={() => addEntry(di)} style={{ fontSize: 11, padding: '5px 10px', borderRadius: 6, border: 'none', background: SAGE, color: 'white', cursor: 'pointer' }}>✓</button>
+                <button onClick={() => setAddingTo(null)} style={{ fontSize: 11, padding: '5px 8px', borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: MUTED }}>×</button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+        {types.map(t => <span key={t.id} style={{ fontSize: 10, display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: t.color }} />{t.label}</span>)}
+      </div>
+    </>)}
+
+    {/* Kid Logistics */}
+    {section === 'logistics' && (<>
+      <div style={{ background: CARD, borderRadius: 14, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', padding: '8px 14px', borderBottom: `1px solid ${BORDER}`, background: BG }}>
+          <span style={{ width: 60, fontSize: 10, fontWeight: 600, color: MUTED }}></span>
+          <span style={{ flex: 1, fontSize: 10, fontWeight: 600, color: MUTED, textAlign: 'center' }}>DROP-OFF</span>
+          <span style={{ flex: 1, fontSize: 10, fontWeight: 600, color: MUTED, textAlign: 'center' }}>PICK-UP</span>
+          <span style={{ width: 24 }}></span>
+        </div>
+        {klDays.length === 0 && <div style={{ padding: 16, textAlign: 'center', color: MUTED, fontSize: 13 }}>No school days this week (Kommetjie)</div>}
+        {klDays.map((day, di) => (
+          <div key={di} style={{ borderBottom: `1px solid ${BORDER}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', padding: '10px 14px' }}>
+              <span style={{ width: 60, fontSize: 12, fontWeight: 600, color: SUBTEXT }}>{day.day} {day.date}</span>
+              <div onClick={() => cycleLogistics(di, 'dropoff')} style={{ flex: 1, textAlign: 'center', cursor: 'pointer' }}>
+                <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 10px', borderRadius: 6, background: (LOGISTICS_COLORS[day.dropoff] || MUTED) + '18', color: LOGISTICS_COLORS[day.dropoff] || MUTED }}>{day.dropoff}</span>
+              </div>
+              <div onClick={() => cycleLogistics(di, 'pickup')} style={{ flex: 1, textAlign: 'center', cursor: 'pointer' }}>
+                <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 10px', borderRadius: 6, background: (LOGISTICS_COLORS[day.pickup] || MUTED) + '18', color: LOGISTICS_COLORS[day.pickup] || MUTED }}>{day.pickup}</span>
+              </div>
+              <span onClick={() => setEditingLogistics(editingLogistics === di ? null : di)} style={{ width: 24, fontSize: 10, color: '#CDD1D9', cursor: 'pointer', textAlign: 'center' }}>{day.notes ? '📝' : '+'}</span>
+            </div>
+            {editingLogistics === di && (
+              <div style={{ padding: '0 14px 10px', marginLeft: 60 }}>
+                <input value={day.notes} onChange={(e) => updateLogisticsNotes(di, e.target.value)} placeholder="Notes (e.g. Tom maths 3:30)" style={{ width: '100%', padding: '6px 10px', borderRadius: 6, border: `1px solid ${BORDER}`, fontSize: 12, outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div style={{ fontSize: 10, color: MUTED, marginTop: 8, textAlign: 'center', fontStyle: 'italic' }}>Tap drop-off/pick-up to cycle: {LOGISTICS_OPTIONS.join(' → ')}</div>
+    </>)}
+  </>);
+}
+
+// ===========================================
+// LISTS TAB
+// ===========================================
 function ListsTab({ meals, setMeals, saveMeals, weekly, setWeekly, saveWeekly, monthly, setMonthly, saveMonthly, toBuy, setToBuy, saveToBuy }) {
   const [listView, setListView] = useState('weekly');
   const [editingMeal, setEditingMeal] = useState(null);
@@ -235,7 +725,7 @@ function ListsTab({ meals, setMeals, saveMeals, weekly, setWeekly, saveWeekly, m
 
     {listView === 'weekly' && (<>
       <div style={{ marginBottom: 20 }}>
-        <h3 style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: MUTED, fontWeight: 600, margin: '0 0 10px' }}>🍽️ Dinner this week</h3>
+        <SectionTitle text="🍽️ Dinner this week" />
         <div style={{ background: CARD, borderRadius: 14, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
           {meals.map((m, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: i < meals.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
@@ -283,7 +773,9 @@ function ListsTab({ meals, setMeals, saveMeals, weekly, setWeekly, saveWeekly, m
   </>);
 }
 
-// --- Main App ---
+// ===========================================
+// MAIN APP
+// ===========================================
 export default function LifeOS({ session }) {
   const [view, setView] = useState('today');
   const [selectedCat, setSelectedCat] = useState(null);
@@ -295,21 +787,26 @@ export default function LifeOS({ session }) {
   const [weekly, setWeekly] = useState(null);
   const [monthly, setMonthly] = useState(null);
   const [toBuy, setToBuy] = useState(null);
-  const [schedule, setSchedule] = useState(null);
   const [custody, setCustody] = useState(null);
+  const [exercise, setExercise] = useState(null);
+  const [socialSched, setSocialSched] = useState(null);
+  const [kidLogistics, setKidLogistics] = useState(null);
 
   useEffect(() => {
     async function load() {
-      const [r, m, w, mo, tb, s, c] = await Promise.all([
+      const [r, m, w, mo, tb, c, ex, so, kl] = await Promise.all([
         loadData('registry', DEFAULT_REGISTRY),
         loadData('meals', DEFAULT_MEALS),
         loadData('weekly_shopping', DEFAULT_WEEKLY),
         loadData('monthly_shopping', DEFAULT_MONTHLY),
         loadData('tobuy_shopping', DEFAULT_TOBUY),
-        loadData('schedule', DEFAULT_SCHEDULE),
         loadData('custody', DEFAULT_CUSTODY),
+        loadData('exercise_schedule', DEFAULT_EXERCISE),
+        loadData('social_schedule', DEFAULT_SOCIAL_SCHED),
+        loadData('kid_logistics', DEFAULT_KID_LOGISTICS),
       ]);
-      setRegistry(r); setMeals(m); setWeekly(w); setMonthly(mo); setToBuy(tb); setSchedule(s); setCustody(c);
+      setRegistry(r); setMeals(m); setWeekly(w); setMonthly(mo); setToBuy(tb);
+      setCustody(c); setExercise(ex); setSocialSched(so); setKidLogistics(kl);
       setLoading(false);
     }
     load();
@@ -326,9 +823,27 @@ export default function LifeOS({ session }) {
     });
   }, [save]);
 
+  const deleteRegistryItem = useCallback((catKey, itemIndex) => {
+    setRegistry((prev) => {
+      const updated = { ...prev };
+      updated[catKey] = { ...updated[catKey], items: updated[catKey].items.filter((_, i) => i !== itemIndex) };
+      save('registry', updated);
+      return updated;
+    });
+  }, [save]);
+
+  const addRegistryItem = useCallback((catKey, newItem) => {
+    setRegistry((prev) => {
+      const updated = { ...prev };
+      updated[catKey] = { ...updated[catKey], items: [...updated[catKey].items, newItem] };
+      save('registry', updated);
+      return updated;
+    });
+  }, [save]);
+
   const logout = async () => { await supabase.auth.signOut(); };
 
-  if (loading || !registry) return <div style={{ minHeight: '100vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', color: MUTED }}>Loading your life...</div>;
+  if (loading || !registry) return <div style={{ minHeight: '100vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', color: MUTED, fontFamily: "'Outfit', sans-serif" }}>Loading your life...</div>;
 
   const allItems = [];
   Object.entries(registry).forEach(([ck, cat]) => { cat.items.forEach((item) => allItems.push({ ...item, catKey: ck })); });
@@ -336,8 +851,8 @@ export default function LifeOS({ session }) {
   const headsUp = allItems.filter((i) => i.status === 'heads-up');
   const handled = allItems.filter((i) => i.status === 'handled');
 
-  const tab = (id, label, emoji) => (<button key={id} onClick={() => { setView(id); setSelectedCat(null); }} style={{ flex: 1, padding: '10px 0', background: 'none', border: 'none', borderBottom: view === id ? `2.5px solid ${ROYAL}` : '2.5px solid transparent', fontSize: 12, fontWeight: view === id ? 600 : 400, color: view === id ? TEXT : MUTED, cursor: 'pointer' }}>{emoji} {label}</button>);
-  const sectionTitle = (text, color) => (<h3 style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: color || MUTED, fontWeight: 600, margin: '0 0 10px' }}>{text}</h3>);
+  const tab = (id, label, emoji) => (<button key={id} onClick={() => { setView(id); setSelectedCat(null); }} style={{ flex: 1, padding: '10px 0', background: 'none', border: 'none', borderBottom: view === id ? `2.5px solid ${ROYAL}` : '2.5px solid transparent', fontSize: 11, fontWeight: view === id ? 600 : 400, color: view === id ? TEXT : MUTED, cursor: 'pointer' }}>{emoji} {label}</button>);
+
   const today = new Date();
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -346,6 +861,7 @@ export default function LifeOS({ session }) {
 
   return (
     <div style={{ minHeight: '100vh', background: BG, maxWidth: 440, margin: '0 auto', paddingBottom: 80 }}>
+      {/* HEADER */}
       <div style={{ padding: '28px 22px 0' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
@@ -359,12 +875,17 @@ export default function LifeOS({ session }) {
         </div>
       </div>
 
+      {/* TABS */}
       <div style={{ display: 'flex', padding: '14px 22px 0', borderBottom: `1px solid ${BORDER}` }}>
-        {tab('today', 'Today', '📋')}{tab('lists', 'Lists', '🛒')}{tab('registry', 'Registry', '🗄️')}{tab('manual', 'Manual', '📖')}
+        {tab('today', 'Today', '📋')}{tab('schedule', 'Schedule', '📅')}{tab('lists', 'Lists', '🛒')}{tab('registry', 'Registry', '🗄️')}{tab('manual', 'Manual', '📖')}
       </div>
 
+      {/* CONTENT */}
       <div style={{ padding: '18px 22px' }}>
+
+        {/* ========= TODAY TAB ========= */}
         {view === 'today' && (<>
+          {/* Status summary */}
           <div style={{ background: `linear-gradient(135deg, ${ROYAL}, ${TEAL})`, borderRadius: 18, padding: '18px 20px', display: 'flex', gap: 12, justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', gap: 16 }}>
               {[{ n: handled.length, l: 'handled' }, { n: headsUp.length, l: 'heads up' }, { n: needsLove.length, l: 'need love' }].map((s, i) => (<div key={i} style={{ textAlign: 'center' }}><div style={{ fontSize: 24, fontFamily: "'Fraunces', serif", fontWeight: 600, color: 'white' }}>{s.n}</div><div style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>{s.l}</div></div>))}
@@ -372,19 +893,36 @@ export default function LifeOS({ session }) {
             <div style={{ display: 'flex', alignItems: 'center' }}><div style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', fontWeight: 500, textAlign: 'right', lineHeight: 1.4 }}>{needsLove.length === 0 ? "Everything's humming ✨" : needsLove.length <= 3 ? 'Almost there 👊' : 'A few things need you'}</div></div>
           </div>
 
-          {custody && <div style={{ marginTop: 20 }}>{sectionTitle('Boys')}<div style={{ display: 'flex', gap: 12 }}><div style={{ flex: 1 }}><CustodyStrip days={custody.thisWeek} label="This week" /></div><div style={{ flex: 1 }}><CustodyStrip days={custody.nextWeek} label="Next week" /></div></div></div>}
+          {/* Custody */}
+          {custody && <div style={{ marginTop: 20 }}><SectionTitle text="👦 Boys" /><div style={{ display: 'flex', gap: 12 }}><div style={{ flex: 1 }}><CustodyStrip days={custody.thisWeek} label="This week" /></div><div style={{ flex: 1 }}><CustodyStrip days={custody.nextWeek} label="Next week" /></div></div></div>}
 
-          {schedule && <><div style={{ marginTop: 20 }}>{sectionTitle('This week')}<ScheduleCard days={schedule.thisWeek} startCollapsed={false} /><div style={{ display: 'flex', gap: 10, marginTop: 8, flexWrap: 'wrap' }}>{[{ l: 'Chloë', c: COLORS.chloe }, { l: 'Cameron', c: COLORS.cameron }, { l: 'Together', c: COLORS.shared }, { l: 'Kids', c: COLORS.kids }, { l: 'House', c: COLORS.home }].map((x, i) => (<span key={i} style={{ fontSize: 10, display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: x.c }} />{x.l}</span>))}</div></div>
-          <div style={{ marginTop: 20 }}>{sectionTitle('Next week')}<ScheduleCard days={schedule.nextWeek} startCollapsed={true} /></div></>}
+          {/* This week schedule - built dynamically from registry/schedule/meals */}
+          <div style={{ marginTop: 20 }}><SectionTitle text="This week" /><ScheduleCard days={buildWeekView('thisWeek', { meals, exercise, socialSched, kidLogistics, custody, registry })} startCollapsed={false} /><div style={{ display: 'flex', gap: 10, marginTop: 8, flexWrap: 'wrap' }}>{[{ l: 'Chloë', c: COLORS.chloe }, { l: 'Cameron', c: COLORS.cameron }, { l: 'Together', c: COLORS.shared }, { l: 'Kids', c: COLORS.kids }, { l: 'House', c: COLORS.home }].map((x, i) => (<span key={i} style={{ fontSize: 10, display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: x.c }} />{x.l}</span>))}</div></div>
+          <div style={{ marginTop: 20 }}><SectionTitle text="Next week" /><ScheduleCard days={buildWeekView('nextWeek', { meals, exercise, socialSched, kidLogistics, custody, registry })} startCollapsed={true} /></div>
 
-          {needsLove.length > 0 && <div style={{ marginTop: 20 }}>{sectionTitle(`💛 Needs some love (${needsLove.length})`, CORAL)}{needsLove.map((item, i) => (<div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: CARD, borderRadius: 12, marginBottom: 6, border: `1px solid ${BORDER}` }}><div><div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{item.name}</div><div style={{ fontSize: 11, color: MUTED, marginTop: 1 }}>{item.owner} · {item.next}</div></div>{item.action && <button style={{ fontSize: 11, padding: '5px 12px', borderRadius: 7, border: 'none', background: '#FEF0ED', color: CORAL, cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>🤖 {item.action}</button>}</div>))}</div>}
-          {headsUp.length > 0 && <div style={{ marginTop: 20 }}>{sectionTitle(`👀 Heads up (${headsUp.length})`, PURPLE)}{headsUp.map((item, i) => (<div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: CARD, borderRadius: 12, marginBottom: 6, border: `1px solid ${BORDER}` }}><div><div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{item.name}</div><div style={{ fontSize: 11, color: MUTED, marginTop: 1 }}>{item.owner} · {item.next}</div></div>{item.action && <button style={{ fontSize: 11, padding: '5px 12px', borderRadius: 7, border: 'none', background: '#F3EFF8', color: PURPLE, cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>🤖 {item.action}</button>}</div>))}</div>}
+          {/* Needs love */}
+          {needsLove.length > 0 && <div style={{ marginTop: 20 }}><SectionTitle text={`💛 Needs some love (${needsLove.length})`} color={CORAL} />{needsLove.map((item, i) => (<div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: CARD, borderRadius: 12, marginBottom: 6, border: `1px solid ${BORDER}` }}><div><div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{item.name}</div><div style={{ fontSize: 11, color: MUTED, marginTop: 1 }}>{item.owner} · {item.next}</div></div>{item.action && <button style={{ fontSize: 11, padding: '5px 12px', borderRadius: 7, border: 'none', background: '#FEF0ED', color: CORAL, cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>🤖 {item.action}</button>}</div>))}</div>}
+
+          {/* Heads up */}
+          {headsUp.length > 0 && <div style={{ marginTop: 20 }}><SectionTitle text={`👀 Heads up (${headsUp.length})`} color={PURPLE} />{headsUp.map((item, i) => (<div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: CARD, borderRadius: 12, marginBottom: 6, border: `1px solid ${BORDER}` }}><div><div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{item.name}</div><div style={{ fontSize: 11, color: MUTED, marginTop: 1 }}>{item.owner} · {item.next}</div></div>{item.action && <button style={{ fontSize: 11, padding: '5px 12px', borderRadius: 7, border: 'none', background: '#F3EFF8', color: PURPLE, cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>🤖 {item.action}</button>}</div>))}</div>}
         </>)}
 
+        {/* ========= SCHEDULE TAB ========= */}
+        {view === 'schedule' && exercise && socialSched && kidLogistics && (
+          <SchedulesTab
+            exercise={exercise} setExercise={setExercise} saveExercise={(v) => save('exercise_schedule', v)}
+            socialSched={socialSched} setSocialSched={setSocialSched} saveSocialSched={(v) => save('social_schedule', v)}
+            kidLogistics={kidLogistics} setKidLogistics={setKidLogistics} saveKidLogistics={(v) => save('kid_logistics', v)}
+            custody={custody} setCustody={setCustody} saveCustody={(v) => save('custody', v)}
+          />
+        )}
+
+        {/* ========= LISTS TAB ========= */}
         {view === 'lists' && meals && weekly && monthly && toBuy && (
           <ListsTab meals={meals} setMeals={setMeals} saveMeals={(v) => save('meals', v)} weekly={weekly} setWeekly={setWeekly} saveWeekly={(v) => save('weekly_shopping', v)} monthly={monthly} setMonthly={setMonthly} saveMonthly={(v) => save('monthly_shopping', v)} toBuy={toBuy} setToBuy={setToBuy} saveToBuy={(v) => save('tobuy_shopping', v)} />
         )}
 
+        {/* ========= REGISTRY TAB ========= */}
         {view === 'registry' && !selectedCat && (<>
           <p style={{ fontSize: 13, color: MUTED, margin: '0 0 14px' }}>Your life's filing cabinet.</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -400,12 +938,18 @@ export default function LifeOS({ session }) {
 
         {view === 'registry' && selectedCat && (<>
           <button onClick={() => setSelectedCat(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, color: MUTED, marginBottom: 12 }}>← Back</button>
-          <h2 style={{ fontSize: 22, fontFamily: "'Fraunces', serif", fontWeight: 600, margin: '0 0 16px' }}>{registry[selectedCat].emoji} {registry[selectedCat].label}</h2>
-          {registry[selectedCat].items.sort((a, b) => STATUS_CONFIG[a.status].sort - STATUS_CONFIG[b.status].sort).map((item, i) => (
-            <ItemRow key={i} item={item} onUpdate={(updated) => updateRegistryItem(selectedCat, i, updated)} />
-          ))}
+          <h2 style={{ fontSize: 22, fontFamily: "'Fraunces', serif", fontWeight: 600, margin: '0 0 12px' }}>{registry[selectedCat].emoji} {registry[selectedCat].label}</h2>
+          <DateFormatTip />
+          {registry[selectedCat].items
+            .map((item, origIdx) => ({ item, origIdx }))
+            .sort((a, b) => STATUS_CONFIG[a.item.status].sort - STATUS_CONFIG[b.item.status].sort)
+            .map(({ item, origIdx }) => (
+              <ItemRow key={origIdx} item={item} onUpdate={(updated) => updateRegistryItem(selectedCat, origIdx, updated)} onDelete={() => deleteRegistryItem(selectedCat, origIdx)} />
+            ))}
+          <AddItemForm onAdd={(newItem) => addRegistryItem(selectedCat, newItem)} />
         </>)}
 
+        {/* ========= MANUAL TAB ========= */}
         {view === 'manual' && (<>
           <div style={{ padding: 22, background: `linear-gradient(135deg, ${TEXT}, #2E3548)`, borderRadius: 20, marginBottom: 16, color: 'white' }}><h3 style={{ fontSize: 20, fontFamily: "'Fraunces', serif", fontWeight: 600, margin: '0 0 6px' }}>The Manual</h3><p style={{ fontSize: 13, margin: 0, opacity: 0.8, lineHeight: 1.5 }}>Everything someone would need to keep your life running.</p></div>
           {[{ emoji: '📞', title: 'Key contacts', desc: `${allItems.reduce((a, i) => a + (i.contacts?.length || 0), 0)} contacts stored` }, { emoji: '📎', title: 'Documents & files', desc: `${allItems.reduce((a, i) => a + (i.docs?.length || 0), 0)} documents stored` }, { emoji: '🔄', title: 'What recurs and who owns it', desc: `${allItems.length} items across ${Object.keys(registry).length} categories` }, { emoji: '👦', title: "Kids' routines + sizes", desc: 'School, pick-ups, lessons, medical, clothing' }, { emoji: '💳', title: 'Financial overview', desc: 'Accounts, insurance, investments, tax' }, { emoji: '🔐', title: 'Account access', desc: 'Password manager, shared accounts' }].map((s, i) => (<div key={i} style={{ padding: '14px 16px', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14 }}><span style={{ fontSize: 22 }}>{s.emoji}</span><div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 600 }}>{s.title}</div><div style={{ fontSize: 12, color: MUTED, marginTop: 1 }}>{s.desc}</div></div><span style={{ color: '#CDD1D9', fontSize: 14 }}>→</span></div>))}
