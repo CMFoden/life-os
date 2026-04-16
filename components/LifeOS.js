@@ -97,15 +97,26 @@ const DEFAULT_REGISTRY = {
   other: { label: 'Other', emoji: '📌', items: [{ name: 'Add anything here', status: 'handled', owner: '—', rhythm: '—', next: '—', notes: 'Catch-all.' }] },
 };
 
-const DEFAULT_MEALS = [
-  { day: 'Sunday', meal: 'Roast Chicken + Veggies', who: 'Chloë' },
-  { day: 'Monday', meal: 'Lean Girl Ostrich Mince Nachos', who: 'Cameron' },
-  { day: 'Tuesday', meal: 'Trout, Veg + Salad', who: 'Chloë' },
-  { day: 'Wednesday', meal: 'Pesto Pasta', who: 'Cameron' },
-  { day: 'Thursday', meal: 'Saucy Beef Strips + Rice Bowl', who: 'Chloë' },
-  { day: 'Friday', meal: 'Dinner Out 🍷', who: '—' },
-  { day: 'Saturday', meal: 'Braai 🔥', who: 'Cameron' },
-];
+const DEFAULT_MEALS = {
+  thisWeek: [
+    { day: 'Sunday', meal: 'Roast Chicken + Veggies', who: 'Chloë' },
+    { day: 'Monday', meal: 'Lean Girl Ostrich Mince Nachos', who: 'Cameron' },
+    { day: 'Tuesday', meal: 'Trout, Veg + Salad', who: 'Chloë' },
+    { day: 'Wednesday', meal: 'Pesto Pasta', who: 'Cameron' },
+    { day: 'Thursday', meal: 'Saucy Beef Strips + Rice Bowl', who: 'Chloë' },
+    { day: 'Friday', meal: 'Dinner Out 🍷', who: '—' },
+    { day: 'Saturday', meal: 'Braai 🔥', who: 'Cameron' },
+  ],
+  nextWeek: [
+    { day: 'Sunday', meal: '', who: '—' },
+    { day: 'Monday', meal: '', who: '—' },
+    { day: 'Tuesday', meal: '', who: '—' },
+    { day: 'Wednesday', meal: '', who: '—' },
+    { day: 'Thursday', meal: '', who: '—' },
+    { day: 'Friday', meal: '', who: '—' },
+    { day: 'Saturday', meal: '', who: '—' },
+  ],
+};
 
 const DEFAULT_WEEKLY = {
   'fruit-veg': [{ id: 1, text: 'Bananas', checked: false }, { id: 2, text: 'Avocados x3', checked: false }, { id: 3, text: 'Broccoli', checked: false }, { id: 4, text: 'Cherry tomatoes', checked: false }, { id: 5, text: 'Salad leaves', checked: false }, { id: 6, text: 'Lemons', checked: false }],
@@ -165,14 +176,17 @@ function buildWeekView(weekKey, { meals, exercise, socialSched, kidLogistics, cu
       }
     }
 
-    // 2. Meals (dinner + cook)
+    // 2. Meals (dinner + cook) - handle both old (array) and new ({thisWeek, nextWeek}) shapes
     if (meals) {
-      const meal = meals.find(m => m.day === dayFull);
-      if (meal && meal.meal) {
-        tags.push({ text: `🍽️ ${meal.meal}`, color: COLORS.shared });
-        if (meal.who && meal.who !== '—') {
-          const cc = meal.who === 'Chloë' ? COLORS.chloe : meal.who === 'Cameron' ? COLORS.cameron : meal.who === 'Together' ? COLORS.shared : MUTED;
-          tags.push({ text: `${meal.who} cooks`, color: cc });
+      const mealsForWeek = Array.isArray(meals) ? meals : meals[weekKey];
+      if (mealsForWeek) {
+        const meal = mealsForWeek.find(m => m.day === dayFull);
+        if (meal && meal.meal) {
+          tags.push({ text: `🍽️ ${meal.meal}`, color: COLORS.shared });
+          if (meal.who && meal.who !== '—') {
+            const cc = meal.who === 'Chloë' ? COLORS.chloe : meal.who === 'Cameron' ? COLORS.cameron : meal.who === 'Together' ? COLORS.shared : MUTED;
+            tags.push({ text: `${meal.who} cooks`, color: cc });
+          }
         }
       }
     }
@@ -291,6 +305,45 @@ const DEFAULT_KID_LOGISTICS = {
 async function loadData(key, fallback) {
   const { data } = await supabase.from('app_data').select('value').eq('key', key).single();
   if (data) {
+    // Migration: registry - backfill stable _id on every item (needed for React keying)
+    if (key === 'registry' && data.value) {
+      let changed = false;
+      const migrated = { ...data.value };
+      Object.keys(migrated).forEach(catKey => {
+        migrated[catKey] = {
+          ...migrated[catKey],
+          items: migrated[catKey].items.map((item, i) => {
+            if (!item._id) {
+              changed = true;
+              return { ...item, _id: `${Date.now()}-${catKey}-${i}-${Math.random().toString(36).slice(2, 6)}` };
+            }
+            return item;
+          }),
+        };
+      });
+      if (changed) {
+        await saveData('registry', migrated);
+        return migrated;
+      }
+      return data.value;
+    }
+    // Migration: meals went from flat array to {thisWeek, nextWeek}
+    if (key === 'meals' && Array.isArray(data.value)) {
+      const migrated = {
+        thisWeek: data.value,
+        nextWeek: [
+          { day: 'Sunday', meal: '', who: '—' },
+          { day: 'Monday', meal: '', who: '—' },
+          { day: 'Tuesday', meal: '', who: '—' },
+          { day: 'Wednesday', meal: '', who: '—' },
+          { day: 'Thursday', meal: '', who: '—' },
+          { day: 'Friday', meal: '', who: '—' },
+          { day: 'Saturday', meal: '', who: '—' },
+        ],
+      };
+      await saveData('meals', migrated);
+      return migrated;
+    }
     // Migration: custody went from 8-day (Sun-Sun) to 7-day (Mon-Sun)
     if (key === 'custody' && data.value?.thisWeek?.length === 8) {
       const migrated = {
@@ -316,6 +369,18 @@ async function loadData(key, fallback) {
       }
     }
     return data.value;
+  }
+  // Fresh install - for registry, seed with stable _ids
+  if (key === 'registry') {
+    const seeded = { ...fallback };
+    Object.keys(seeded).forEach(catKey => {
+      seeded[catKey] = {
+        ...seeded[catKey],
+        items: seeded[catKey].items.map((item, i) => ({ ...item, _id: `seed-${catKey}-${i}` })),
+      };
+    });
+    await supabase.from('app_data').insert({ key, value: seeded });
+    return seeded;
   }
   await supabase.from('app_data').insert({ key, value: fallback });
   return fallback;
@@ -359,14 +424,21 @@ function DateFormatTip() {
 // ===========================================
 // REGISTRY ITEM ROW (Full Editability)
 // ===========================================
-function ItemRow({ item: init, onUpdate, onDelete }) {
+function ItemRow({ item, onUpdate, onDelete }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [item, setItem] = useState(init);
   const [draft, setDraft] = useState({});
   const [showDelete, setShowDelete] = useState(false);
   const [addingContact, setAddingContact] = useState(false);
   const [newContact, setNewContact] = useState({ name: '', role: '', phone: '' });
+
+  // Reset transient UI state when the underlying item identity changes
+  // (prevents showDelete leaking from a deleted item to a different one)
+  useEffect(() => {
+    setShowDelete(false);
+    setEditing(false);
+    setAddingContact(false);
+  }, [item._id]);
 
   const startEdit = () => {
     setEditing(true);
@@ -379,29 +451,29 @@ function ItemRow({ item: init, onUpdate, onDelete }) {
 
   const saveEdit = () => {
     const updated = { ...item, name: draft.name, owner: draft.owner, rhythm: draft.rhythm, next: draft.next, notes: draft.notes, action: draft.action || undefined, details: Object.keys(draft.details).length > 0 ? draft.details : item.details };
-    setItem(updated); setEditing(false); if (onUpdate) onUpdate(updated);
+    setEditing(false); if (onUpdate) onUpdate(updated);
   };
 
-  const setStatus = (s) => { const updated = { ...item, status: s }; setItem(updated); if (onUpdate) onUpdate(updated); };
+  const setStatus = (s) => { const updated = { ...item, status: s }; if (onUpdate) onUpdate(updated); };
 
   const removeContact = (idx) => {
     const updated = { ...item, contacts: item.contacts.filter((_, i) => i !== idx) };
     if (updated.contacts.length === 0) delete updated.contacts;
-    setItem(updated); if (onUpdate) onUpdate(updated);
+    if (onUpdate) onUpdate(updated);
   };
 
   const addContact = () => {
     if (!newContact.name.trim()) return;
     const contacts = [...(item.contacts || []), { ...newContact }];
     const updated = { ...item, contacts };
-    setItem(updated); if (onUpdate) onUpdate(updated);
+    if (onUpdate) onUpdate(updated);
     setNewContact({ name: '', role: '', phone: '' }); setAddingContact(false);
   };
 
   const removeDoc = (idx) => {
     const updated = { ...item, docs: item.docs.filter((_, i) => i !== idx) };
     if (updated.docs.length === 0) delete updated.docs;
-    setItem(updated); if (onUpdate) onUpdate(updated);
+    if (onUpdate) onUpdate(updated);
   };
 
   const addDetail = () => {
@@ -411,7 +483,7 @@ function ItemRow({ item: init, onUpdate, onDelete }) {
     if (val === null) return;
     const details = { ...(item.details || {}), [key]: val };
     const updated = { ...item, details };
-    setItem(updated); if (onUpdate) onUpdate(updated);
+    if (onUpdate) onUpdate(updated);
   };
 
   const hasRich = item.contacts || item.docs || item.links || item.details || item.notes;
@@ -532,6 +604,25 @@ function CustodyStrip({ days, label, onToggle }) {
   return (<div>{label && <div style={{ fontSize: 10, color: MUTED, fontWeight: 500, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>}<div style={{ display: 'flex', gap: 2, background: BG, borderRadius: 10, padding: 3, border: `1px solid ${BORDER}` }}>{days.map((d, i) => { const isN = d.loc === 'N'; return (<div key={i} onClick={() => onToggle && onToggle(i)} style={{ flex: 1, textAlign: 'center', padding: '7px 0', borderRadius: 7, background: isN ? ROYAL : 'transparent', color: isN ? 'white' : MUTED, cursor: onToggle ? 'pointer' : 'default' }}><div style={{ fontSize: 10, fontWeight: 600 }}>{d.day}</div><div style={{ fontSize: 7, marginTop: 1, opacity: 0.85 }}>{isN ? 'NWL' : 'KOM'}</div></div>); })}</div>{onToggle && <div style={{ fontSize: 9, color: MUTED, marginTop: 4, fontStyle: 'italic', textAlign: 'center' }}>Tap a day to toggle</div>}</div>);
 }
 
+// Compute the day labels (Mon 14, Tue 15 etc.) for a given week relative to today
+function computeWeekDates(weekKey) {
+  const today = new Date();
+  const dow = today.getDay();
+  const daysToMonday = dow === 0 ? -6 : 1 - dow;
+  const weekOffset = weekKey === 'nextWeek' ? 7 : 0;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + daysToMonday + weekOffset);
+  monday.setHours(0, 0, 0, 0);
+  const dayShortNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const out = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    out.push({ day: dayShortNames[i], date: String(d.getDate()) });
+  }
+  return out;
+}
+
 // ===========================================
 // SCHEDULES TAB (NEW)
 // ===========================================
@@ -544,9 +635,15 @@ function SchedulesTab({ exercise, setExercise, saveExercise, socialSched, setSoc
   const [editingLogistics, setEditingLogistics] = useState(null); // { dayIdx, field }
 
   const weekLabel = weekView === 'thisWeek' ? 'This week' : 'Next week';
-  const exDays = exercise?.[weekView] || [];
-  const soDays = socialSched?.[weekView] || [];
-  const klDays = kidLogistics?.[weekView] || [];
+
+  // Live dates for this render, computed from today's date (not stored values)
+  const liveDates = computeWeekDates(weekView);
+
+  // Overlay live dates onto the stored entries (stored data holds entries; dates are derived)
+  const exDays = (exercise?.[weekView] || []).map((d, i) => ({ ...d, day: liveDates[i]?.day || d.day, date: liveDates[i]?.date || d.date }));
+  const soDays = (socialSched?.[weekView] || []).map((d, i) => ({ ...d, day: liveDates[i]?.day || d.day, date: liveDates[i]?.date || d.date }));
+  // Kid logistics is Mon-Fri only (5 days)
+  const klDays = (kidLogistics?.[weekView] || []).map((d, i) => ({ ...d, day: liveDates[i]?.day || d.day, date: liveDates[i]?.date || d.date }));
   const types = section === 'exercise' ? EXERCISE_TYPES : SOCIAL_TYPES;
 
   const typeColor = (t) => {
@@ -698,14 +795,25 @@ function SchedulesTab({ exercise, setExercise, saveExercise, socialSched, setSoc
 // ===========================================
 function ListsTab({ meals, setMeals, saveMeals, weekly, setWeekly, saveWeekly, monthly, setMonthly, saveMonthly, toBuy, setToBuy, saveToBuy }) {
   const [listView, setListView] = useState('weekly');
+  const [mealWeek, setMealWeek] = useState('thisWeek');
   const [editingMeal, setEditingMeal] = useState(null);
   const [mealDraft, setMealDraft] = useState('');
   const [editingCook, setEditingCook] = useState(null);
   const [newItem, setNewItem] = useState('');
   const [newAisle, setNewAisle] = useState('other');
 
-  const saveMealEdit = (i) => { const updated = meals.map((m, j) => j === i ? { ...m, meal: mealDraft } : m); setMeals(updated); saveMeals(updated); setEditingMeal(null); };
-  const setCook = (i, who) => { const updated = meals.map((m, j) => j === i ? { ...m, who } : m); setMeals(updated); saveMeals(updated); setEditingCook(null); };
+  const currentMeals = meals?.[mealWeek] || [];
+
+  const saveMealEdit = (i) => {
+    const updatedWeek = currentMeals.map((m, j) => j === i ? { ...m, meal: mealDraft } : m);
+    const updated = { ...meals, [mealWeek]: updatedWeek };
+    setMeals(updated); saveMeals(updated); setEditingMeal(null);
+  };
+  const setCook = (i, who) => {
+    const updatedWeek = currentMeals.map((m, j) => j === i ? { ...m, who } : m);
+    const updated = { ...meals, [mealWeek]: updatedWeek };
+    setMeals(updated); saveMeals(updated); setEditingCook(null);
+  };
   const cookColor = (w) => w === 'Chloë' ? ROYAL : w === 'Cameron' ? TEAL : w === 'Together' ? PURPLE : MUTED;
 
   const toggleW = (aisle, id) => { const u = { ...weekly, [aisle]: weekly[aisle].map((i) => i.id === id ? { ...i, checked: !i.checked } : i) }; setWeekly(u); saveWeekly(u); };
@@ -725,17 +833,22 @@ function ListsTab({ meals, setMeals, saveMeals, weekly, setWeekly, saveWeekly, m
 
     {listView === 'weekly' && (<>
       <div style={{ marginBottom: 20 }}>
-        <SectionTitle text="🍽️ Dinner this week" />
+        <SectionTitle text={`🍽️ Dinner ${mealWeek === 'thisWeek' ? 'this week' : 'next week'}`} />
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          {['thisWeek', 'nextWeek'].map(w => (
+            <button key={w} onClick={() => { setMealWeek(w); setEditingMeal(null); setEditingCook(null); }} style={{ flex: 1, padding: '7px', borderRadius: 8, border: `1px solid ${BORDER}`, background: mealWeek === w ? TEXT : CARD, color: mealWeek === w ? 'white' : SUBTEXT, cursor: 'pointer', fontSize: 11, fontWeight: 500 }}>{w === 'thisWeek' ? 'This week' : 'Next week'}</button>
+          ))}
+        </div>
         <div style={{ background: CARD, borderRadius: 14, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
-          {meals.map((m, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: i < meals.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
+          {currentMeals.map((m, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: i < currentMeals.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
               <span style={{ width: 32, fontSize: 11, fontWeight: 600, color: SUBTEXT, flexShrink: 0 }}>{m.day.slice(0, 3)}</span>
               {editingMeal === i ? (
                 <div style={{ flex: 1, display: 'flex', gap: 6 }}>
                   <input value={mealDraft} onChange={(e) => setMealDraft(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveMealEdit(i)} style={{ flex: 1, padding: '5px 8px', borderRadius: 6, border: `1px solid ${BORDER}`, fontSize: 13, outline: 'none' }} autoFocus />
                   <button onClick={() => saveMealEdit(i)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: 'none', background: SAGE, color: 'white', cursor: 'pointer' }}>✓</button>
                 </div>
-              ) : <span onClick={() => { setEditingMeal(i); setMealDraft(meals[i].meal); setEditingCook(null); }} style={{ flex: 1, fontSize: 13, color: TEXT, cursor: 'pointer' }}>{m.meal}</span>}
+              ) : <span onClick={() => { setEditingMeal(i); setMealDraft(currentMeals[i].meal); setEditingCook(null); }} style={{ flex: 1, fontSize: 13, color: m.meal ? TEXT : MUTED, cursor: 'pointer', fontStyle: m.meal ? 'normal' : 'italic' }}>{m.meal || 'Tap to plan...'}</span>}
               {editingCook === i ? (
                 <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
                   {COOK_OPTIONS.map((opt) => (<button key={opt} onClick={() => setCook(i, opt)} style={{ fontSize: 10, padding: '3px 7px', borderRadius: 5, border: `1px solid ${BORDER}`, background: m.who === opt ? cookColor(opt) + '20' : CARD, color: cookColor(opt), cursor: 'pointer', fontWeight: 500 }}>{opt}</button>))}
@@ -814,19 +927,19 @@ export default function LifeOS({ session }) {
 
   const save = useCallback(async (key, value) => { setSaving(true); await saveData(key, value); setSaving(false); }, []);
 
-  const updateRegistryItem = useCallback((catKey, itemIndex, updatedItem) => {
+  const updateRegistryItemById = useCallback((catKey, itemId, updatedItem) => {
     setRegistry((prev) => {
       const updated = { ...prev };
-      updated[catKey] = { ...updated[catKey], items: updated[catKey].items.map((item, i) => i === itemIndex ? updatedItem : item) };
+      updated[catKey] = { ...updated[catKey], items: updated[catKey].items.map((item) => item._id === itemId ? { ...updatedItem, _id: itemId } : item) };
       save('registry', updated);
       return updated;
     });
   }, [save]);
 
-  const deleteRegistryItem = useCallback((catKey, itemIndex) => {
+  const deleteRegistryItemById = useCallback((catKey, itemId) => {
     setRegistry((prev) => {
       const updated = { ...prev };
-      updated[catKey] = { ...updated[catKey], items: updated[catKey].items.filter((_, i) => i !== itemIndex) };
+      updated[catKey] = { ...updated[catKey], items: updated[catKey].items.filter((item) => item._id !== itemId) };
       save('registry', updated);
       return updated;
     });
@@ -835,7 +948,8 @@ export default function LifeOS({ session }) {
   const addRegistryItem = useCallback((catKey, newItem) => {
     setRegistry((prev) => {
       const updated = { ...prev };
-      updated[catKey] = { ...updated[catKey], items: [...updated[catKey].items, newItem] };
+      const withId = { ...newItem, _id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}` };
+      updated[catKey] = { ...updated[catKey], items: [...updated[catKey].items, withId] };
       save('registry', updated);
       return updated;
     });
@@ -943,8 +1057,8 @@ export default function LifeOS({ session }) {
           {registry[selectedCat].items
             .map((item, origIdx) => ({ item, origIdx }))
             .sort((a, b) => STATUS_CONFIG[a.item.status].sort - STATUS_CONFIG[b.item.status].sort)
-            .map(({ item, origIdx }) => (
-              <ItemRow key={origIdx} item={item} onUpdate={(updated) => updateRegistryItem(selectedCat, origIdx, updated)} onDelete={() => deleteRegistryItem(selectedCat, origIdx)} />
+            .map(({ item }) => (
+              <ItemRow key={item._id} item={item} onUpdate={(updated) => updateRegistryItemById(selectedCat, item._id, updated)} onDelete={() => deleteRegistryItemById(selectedCat, item._id)} />
             ))}
           <AddItemForm onAdd={(newItem) => addRegistryItem(selectedCat, newItem)} />
         </>)}
