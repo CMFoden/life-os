@@ -43,42 +43,42 @@ const DEFAULT_REGISTRY = {
     { name: 'Vacuum filters', status: 'heads-up', owner: 'Chloë', rhythm: 'Every 3 months', next: 'Apr 20', notes: 'Dyson V15 SV22.', links: [{ label: 'Order filters', url: '#' }] },
   ]},
   vehicles: { label: 'Vehicles', emoji: '🚗', items: [
-    { name: 'Jimny', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Jul 2026', contacts: [{ name: 'Suzuki Tygerberg', role: 'Dealer', phone: '021 XXX XXXX' }], notes: '38,400km. Service plan to 60k/2028.', docs: ['Service book', 'Insurance cert', 'Service history'], details: { reg: 'CA XXX XXX', colour: 'Kinetic Yellow' } },
+    { name: 'Jimny', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Jul 2026', contacts: [{ name: 'Suzuki Tygerberg', role: 'Dealer', phone: '021 XXX XXXX' }], notes: '38,400km. Service plan to 60k/2028.', folderUrl: '', details: { reg: 'CA XXX XXX', colour: 'Kinetic Yellow' } },
     { name: 'Jimny licence disk', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Sep 2026', links: [{ label: 'WC eServices', url: '#' }] },
-    { name: "Cameron's car", status: 'heads-up', owner: 'Cameron', rhythm: 'Annually', next: 'Service due May 2026', docs: ['Service book', 'Insurance cert'], action: 'Book service' },
+    { name: "Cameron's car", status: 'heads-up', owner: 'Cameron', rhythm: 'Annually', next: 'Service due May 2026', action: 'Book service' },
   ]},
   kids: { label: 'Tom & Luke', emoji: '👦', items: [
     { name: 'Tom (13)', status: 'handled', owner: 'Both', rhythm: '—', next: '—', notes: 'No allergies. Discovery Coastal.', details: { age: '13', school: 'Grade 8', shoeSize: 'UK 7', clothing: '13-14 / Men S', nonUniform: 'Jeans 28, T-shirt S' }, contacts: [{ name: 'Dr van der Merwe', role: 'Dentist', phone: '021 XXX' }] },
     { name: 'Luke (11)', status: 'handled', owner: 'Both', rhythm: '—', next: '—', notes: 'Slight astigmatism left eye.', details: { age: '11', school: 'Grade 6', shoeSize: 'UK 5', clothing: '11-12 yrs', nonUniform: 'Jeans 26, T-shirt 11-12' }, contacts: [{ name: 'Spec-Savers', role: 'Optom', phone: '021 XXX' }] },
     { name: 'Tom dentist', status: 'needs-love', owner: 'Chloë', rhythm: 'Annually', next: 'Was due Feb 2026', action: 'Book appointment' },
     { name: 'Luke eye test', status: 'heads-up', owner: 'Chloë', rhythm: 'Annually', next: 'Apr 2026', action: 'Book appointment' },
-    { name: 'School fees Term 2', status: 'handled', owner: 'Cameron', rhythm: 'Per term', next: 'Paid ✓', docs: ['Invoice', 'Payment proof'] },
+    { name: 'School fees Term 2', status: 'handled', owner: 'Cameron', rhythm: 'Per term', next: 'Paid ✓' },
     { name: 'Extra maths (Tom)', status: 'handled', owner: 'Chloë', rhythm: 'Weekly Tue', next: 'Tue 15 Apr', contacts: [{ name: 'Mrs Jacobs', role: 'Tutor', phone: '083 XXX' }], notes: 'R450/session. Tuesdays 3:30pm.' },
     { name: 'Cricket (Luke)', status: 'handled', owner: 'Cameron', rhythm: 'Weekly Sat', next: 'Sat 19 Apr' },
     { name: 'School uniforms', status: 'handled', owner: 'Chloë', rhythm: 'As needed', next: 'Check start of term', notes: 'Tom: blazer 13-14, shirt 38, shorts 30. Luke: blazer 11-12, shirt 34, shorts 28.' },
   ]},
   health: { label: 'Health', emoji: '🩺', items: [
-    { name: 'Chloë bloods', status: 'heads-up', owner: 'Chloë', rhythm: 'Bi-annual', next: 'Apr 2026', contacts: [{ name: 'Pathcare Newlands', role: 'Lab', phone: '021 XXX' }], docs: ['Results Oct 2025'], action: 'Book bloods' },
+    { name: 'Chloë bloods', status: 'heads-up', owner: 'Chloë', rhythm: 'Bi-annual', next: 'Apr 2026', contacts: [{ name: 'Pathcare Newlands', role: 'Lab', phone: '021 XXX' }], action: 'Book bloods' },
     { name: 'Chloë hygienist', status: 'handled', owner: 'Chloë', rhythm: 'Twice yearly', next: 'Jun 2026' },
-    { name: 'Chloë mole mapping', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Nov 2026', docs: ['Report Nov 2025'] },
+    { name: 'Chloë mole mapping', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Nov 2026' },
     { name: 'Cameron GP', status: 'needs-love', owner: 'Cameron', rhythm: 'Annually', next: 'Was due Jan 2026', contacts: [{ name: 'Dr Pillay', role: 'GP', phone: '021 XXX' }], action: 'Book check-up' },
     { name: 'Cameron dentist', status: 'handled', owner: 'Cameron', rhythm: 'Annually', next: 'Aug 2026' },
   ]},
   finance: { label: 'Finance & Legal', emoji: '💰', items: [
-    { name: 'UK tax filing', status: 'heads-up', owner: 'Chloë', rhythm: 'Annually', next: 'Due Jul 2026', contacts: [{ name: 'James', role: 'UK tax', phone: '+44 XXX' }], docs: ["Last year's return"], action: 'Schedule call' },
+    { name: 'UK tax filing', status: 'heads-up', owner: 'Chloë', rhythm: 'Annually', next: 'Due Jul 2026', contacts: [{ name: 'James', role: 'UK tax', phone: '+44 XXX' }], folderUrl: '', action: 'Schedule call' },
     { name: 'SA financial advisor', status: 'needs-love', owner: 'Chloë', rhythm: 'Bi-annual', next: 'Was due Mar 2026', contacts: [{ name: 'Mark (Dovetail)', role: 'FA', phone: '082 XXX' }], action: 'Schedule call' },
-    { name: 'Wills update', status: 'needs-love', owner: 'Both', rhythm: 'Every 2 years', next: 'Last updated 2023', docs: ['Current wills (2023)'], action: 'Book appointment' },
+    { name: 'Wills update', status: 'needs-love', owner: 'Both', rhythm: 'Every 2 years', next: 'Last updated 2023', folderUrl: '', action: 'Book appointment' },
     { name: 'Monthly budget', status: 'handled', owner: 'Both', rhythm: 'Monthly', next: 'May 1', links: [{ label: 'Budget sheet', url: '#' }] },
   ]},
   documents: { label: 'Documents', emoji: '📄', items: [
-    { name: 'Chloë SA passport', status: 'handled', owner: 'Chloë', rhythm: '10 years', next: 'Expires 2031', details: { number: 'AXXXXXXX', expires: '2031' }, docs: ['Scan'] },
-    { name: 'Chloë UK passport', status: 'heads-up', owner: 'Chloë', rhythm: '10 years', next: 'Expires Dec 2026', notes: '6-month rule. Unusable from Jun 2026.', docs: ['Scan'], action: 'Start renewal' },
+    { name: 'Chloë SA passport', status: 'handled', owner: 'Chloë', rhythm: '10 years', next: 'Expires 2031', details: { number: 'AXXXXXXX', expires: '2031' } },
+    { name: 'Chloë UK passport', status: 'heads-up', owner: 'Chloë', rhythm: '10 years', next: 'Expires Dec 2026', notes: '6-month rule. Unusable from Jun 2026.', action: 'Start renewal' },
     { name: 'Cameron NZ passport', status: 'handled', owner: 'Cameron', rhythm: '10 years', next: 'Expires 2029' },
     { name: 'Tom SA passport', status: 'handled', owner: 'Chloë', rhythm: '5 years', next: 'Expires 2028', notes: 'Also NZ, UK, Finnish.' },
     { name: 'Luke SA passport', status: 'handled', owner: 'Chloë', rhythm: '5 years', next: 'Expires 2028', notes: 'Also NZ, UK, Finnish.' },
   ]},
   rentals: { label: 'Rentals', emoji: '🏘️', items: [
-    { name: 'Property 1', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Lease Oct 2026', contacts: [{ name: 'Sarah', role: 'Tenant', phone: '079 XXX' }], docs: ['Lease', 'Deposit receipt'], notes: 'R12,500/m auto debit.' },
+    { name: 'Property 1', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Lease Oct 2026', contacts: [{ name: 'Sarah', role: 'Tenant', phone: '079 XXX' }], folderUrl: '', notes: 'R12,500/m auto debit.' },
     { name: 'Property 2 geyser', status: 'heads-up', owner: 'Chloë', rhythm: 'Ad hoc', next: 'Flagged by tenant', contacts: [{ name: 'Johan', role: 'Tenant', phone: '082 XXX' }, { name: 'Dave', role: 'Plumber', phone: '073 XXX' }], action: 'Call plumber' },
   ]},
   equipment: { label: 'Equipment', emoji: '🚲', items: [
@@ -90,8 +90,8 @@ const DEFAULT_REGISTRY = {
     { name: "Cameron's mom birthday", status: 'heads-up', owner: 'Both', rhythm: 'Annual', next: 'Apr 28', notes: 'Last year: Jonkershuis lunch.', action: 'Get gift sorted' },
   ]},
   appliances: { label: 'Appliances', emoji: '🔌', items: [
-    { name: 'Fridge', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Warranty 2028', details: { brand: 'Samsung', model: 'RF28XXXXX', purchased: '2023' }, docs: ['Warranty', 'Receipt'] },
-    { name: 'Washing machine', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Warranty 2027', details: { brand: 'LG', purchased: '2022' }, docs: ['Warranty'] },
+    { name: 'Fridge', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Warranty 2028', details: { brand: 'Samsung', model: 'RF28XXXXX', purchased: '2023' } },
+    { name: 'Washing machine', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Warranty 2027', details: { brand: 'LG', purchased: '2022' } },
     { name: 'Oven', status: 'heads-up', owner: 'Cameron', rhythm: 'Annually', next: 'May 2026', details: { brand: 'Smeg' }, action: 'Book service' },
   ]},
   other: { label: 'Other', emoji: '📌', items: [{ name: 'Add anything here', status: 'handled', owner: '—', rhythm: '—', next: '—', notes: 'Catch-all.' }] },
@@ -215,13 +215,49 @@ function buildWeekView(weekKey, { meals, exercise, socialSched, kidLogistics, cu
       if (kl.notes?.trim()) tags.push({ text: kl.notes, color: COLORS.kids });
     }
 
-    // 6. Registry items matching this day (by date substring)
+    // 6. Registry items matching this day
+    // Matching order (first match wins):
+    //   (a) Rhythm contains explicit day-of-week tokens (e.g. "Mon/Wed/Thu", "Weekly Tue") → recurring weekly
+    //   (b) Social category + name contains "birthday"/"anniversary" → annual recurrence on month+date
+    //   (c) Exact day-prefix match on "next" (e.g. next="Mon 14 Apr" only matches Monday the 14th April)
+    //   (d) "Next" without a day prefix matches a specific calendar date (e.g. next="Apr 20")
     if (registry) {
-      const patterns = [`${dayShort} ${date}`, `${date} ${month}`, `${month} ${date}`];
-      Object.values(registry).forEach(cat => {
+      const dayIdxMap = { mon: 0, tue: 1, wed: 2, thu: 3, fri: 4, sat: 5, sun: 6 };
+      Object.entries(registry).forEach(([catKey, cat]) => {
         cat.items.forEach(item => {
+          const name = item.name || '';
+
+          // (a) Rhythm-based weekly recurrence
+          const rhythm = (item.rhythm || '').toLowerCase();
+          const rhythmDayTokens = rhythm.match(/\b(mon|tue|wed|thu|fri|sat|sun)\b/g);
+          if (rhythmDayTokens && rhythmDayTokens.length > 0) {
+            const recurIdxs = rhythmDayTokens.map(d => dayIdxMap[d]);
+            if (recurIdxs.includes(i)) {
+              tags.push({ text: item.name, color: COLORS.home });
+            }
+            return; // rhythm has explicit days; don't fall through to date matching
+          }
+
+          // (b) Annual birthdays / anniversaries (Social category)
+          const isAnnualEvent = catKey === 'social' && /birthday|anniversary/i.test(name);
+          if (isAnnualEvent && item.next) {
+            const monthDate = `${month} ${date}`;
+            const dateMonth = `${date} ${month}`;
+            if (item.next.includes(monthDate) || item.next.includes(dateMonth)) {
+              tags.push({ text: `🎂 ${item.name}`, color: COLORS.home });
+            }
+            return; // birthdays only match annually; don't fall through
+          }
+
+          // (c) & (d) Date-based one-off matching
           if (!item.next) return;
-          if (patterns.some(p => item.next.includes(p))) {
+          // If next starts with a day prefix, require it to match this day
+          const prefixMatch = item.next.match(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/i);
+          if (prefixMatch && prefixMatch[1].toLowerCase() !== dayShort.toLowerCase()) return;
+          // Require the exact date+month token to appear (word-bounded to avoid "14 Apr" matching inside "144 Apr" etc.)
+          const dateMonthRe = new RegExp(`\\b${date}\\s+${month}\\b`);
+          const monthDateRe = new RegExp(`\\b${month}\\s+${date}\\b`);
+          if (dateMonthRe.test(item.next) || monthDateRe.test(item.next)) {
             tags.push({ text: item.name, color: COLORS.home });
           }
         });
@@ -305,7 +341,8 @@ const DEFAULT_KID_LOGISTICS = {
 async function loadData(key, fallback) {
   const { data } = await supabase.from('app_data').select('value').eq('key', key).single();
   if (data) {
-    // Migration: registry - backfill stable _id on every item (needed for React keying)
+    // Migration: registry - backfill stable _id on every item (needed for React keying),
+    // and strip legacy `docs` arrays (replaced by folderUrl in Phase 2.1)
     if (key === 'registry' && data.value) {
       let changed = false;
       const migrated = { ...data.value };
@@ -313,11 +350,18 @@ async function loadData(key, fallback) {
         migrated[catKey] = {
           ...migrated[catKey],
           items: migrated[catKey].items.map((item, i) => {
-            if (!item._id) {
+            let out = item;
+            if (!out._id) {
               changed = true;
-              return { ...item, _id: `${Date.now()}-${catKey}-${i}-${Math.random().toString(36).slice(2, 6)}` };
+              out = { ...out, _id: `${Date.now()}-${catKey}-${i}-${Math.random().toString(36).slice(2, 6)}` };
             }
-            return item;
+            if (out.docs) {
+              changed = true;
+              const copy = { ...out };
+              delete copy.docs;
+              out = copy;
+            }
+            return out;
           }),
         };
       });
@@ -408,12 +452,19 @@ function DateFormatTip() {
       </div>
       {open && (
         <div style={{ padding: '0 12px 12px', fontSize: 12, color: SUBTEXT, lineHeight: 1.55 }}>
-          Items with a <strong>Next</strong> date auto-appear in your weekly view on Today tab. Use these formats:
-          <ul style={{ margin: '6px 0 0 0', paddingLeft: 18 }}>
+          Items auto-appear in your weekly view on Today tab. Two ways to make this happen:
+          <div style={{ marginTop: 8, fontWeight: 600, color: TEXT }}>1. Weekly recurring — use Rhythm</div>
+          <ul style={{ margin: '4px 0 0 0', paddingLeft: 18 }}>
+            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Mon/Wed/Thu</code> — shows every Mon, Wed, Thu</li>
+            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Weekly Tue</code> or <code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Weekly Sat</code></li>
+          </ul>
+          <div style={{ marginTop: 8, fontWeight: 600, color: TEXT }}>2. One-off date — use Next</div>
+          <ul style={{ margin: '4px 0 0 0', paddingLeft: 18 }}>
             <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>15 Apr</code> or <code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Apr 15</code> — appears on that day</li>
             <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Tue 15 Apr</code> — also works</li>
-            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Jul 2026</code>, <code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Expires 2028</code> — shown as-is in the item, no auto-day matching</li>
+            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Jul 2026</code>, <code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Expires 2028</code> — shown as-is, no day matching</li>
           </ul>
+          <div style={{ marginTop: 8, fontSize: 11, color: MUTED }}>🎂 Birthdays in the People & Social category auto-repeat every year on the same date.</div>
           <div style={{ marginTop: 6, fontStyle: 'italic', color: MUTED, fontSize: 11 }}>Avoid: "Monday 14 April 2026", "next Tuesday", "April"</div>
         </div>
       )}
@@ -444,13 +495,14 @@ function ItemRow({ item, onUpdate, onDelete }) {
     setEditing(true);
     setDraft({
       name: item.name || '', owner: item.owner || '', rhythm: item.rhythm || '', next: item.next || '',
-      notes: item.notes || '', action: item.action || '',
+      notes: item.notes || '', action: item.action || '', folderUrl: item.folderUrl || '',
       details: item.details ? { ...item.details } : {},
     });
   };
 
   const saveEdit = () => {
-    const updated = { ...item, name: draft.name, owner: draft.owner, rhythm: draft.rhythm, next: draft.next, notes: draft.notes, action: draft.action || undefined, details: Object.keys(draft.details).length > 0 ? draft.details : item.details };
+    const updated = { ...item, name: draft.name, owner: draft.owner, rhythm: draft.rhythm, next: draft.next, notes: draft.notes, action: draft.action || undefined, folderUrl: draft.folderUrl?.trim() || undefined, details: Object.keys(draft.details).length > 0 ? draft.details : item.details };
+    if (!updated.folderUrl) delete updated.folderUrl;
     setEditing(false); if (onUpdate) onUpdate(updated);
   };
 
@@ -470,12 +522,6 @@ function ItemRow({ item, onUpdate, onDelete }) {
     setNewContact({ name: '', role: '', phone: '' }); setAddingContact(false);
   };
 
-  const removeDoc = (idx) => {
-    const updated = { ...item, docs: item.docs.filter((_, i) => i !== idx) };
-    if (updated.docs.length === 0) delete updated.docs;
-    if (onUpdate) onUpdate(updated);
-  };
-
   const addDetail = () => {
     const key = prompt('Detail name (e.g. "brand", "model"):');
     if (!key) return;
@@ -486,7 +532,7 @@ function ItemRow({ item, onUpdate, onDelete }) {
     if (onUpdate) onUpdate(updated);
   };
 
-  const hasRich = item.contacts || item.docs || item.links || item.details || item.notes;
+  const hasRich = item.contacts || item.folderUrl || item.links || item.details || item.notes;
   const inputStyle = { flex: 1, padding: '6px 10px', borderRadius: 6, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, outline: 'none', fontFamily: "'Outfit', sans-serif" };
   const labelStyle = { fontSize: 11, color: MUTED, width: 60, flexShrink: 0, fontWeight: 500 };
 
@@ -499,7 +545,7 @@ function ItemRow({ item, onUpdate, onDelete }) {
             <div style={{ fontSize: 12, color: MUTED, marginTop: 3 }}>{item.owner} · {item.rhythm} · {item.next}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {hasRich && !open && <div style={{ display: 'flex', gap: 2 }}>{item.contacts && <span style={{ fontSize: 10, opacity: 0.4 }}>📞</span>}{item.docs && <span style={{ fontSize: 10, opacity: 0.4 }}>📎</span>}</div>}
+            {hasRich && !open && <div style={{ display: 'flex', gap: 2 }}>{item.contacts && <span style={{ fontSize: 10, opacity: 0.4 }}>📞</span>}{item.folderUrl && <span style={{ fontSize: 10, opacity: 0.4 }}>📁</span>}</div>}
             <span style={{ fontSize: 10, color: '#CDD1D9', transform: open ? 'rotate(180deg)' : '', transition: 'transform 0.2s' }}>▼</span>
           </div>
         </div>
@@ -516,7 +562,7 @@ function ItemRow({ item, onUpdate, onDelete }) {
             {item.details && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>{Object.entries(item.details).map(([k, v]) => (<div key={k} style={{ fontSize: 11, color: SUBTEXT, background: BG, padding: '4px 10px', borderRadius: 6, border: `1px solid ${BORDER}` }}><span style={{ color: MUTED, textTransform: 'capitalize' }}>{k.replace(/([A-Z])/g, ' $1').trim()}:</span> {v}</div>))}<button onClick={addDetail} style={{ fontSize: 11, color: ROYAL, background: 'transparent', border: `1px dashed ${BORDER}`, borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}>+ detail</button></div>}
             {item.contacts && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Contacts</div>{item.contacts.map((c, i) => (<div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 0' }}><div><span style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{c.name}</span><span style={{ fontSize: 12, color: MUTED, marginLeft: 6 }}>{c.role}</span></div><div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><a href={`tel:${c.phone}`} style={{ fontSize: 12, color: ROYAL, textDecoration: 'none', fontWeight: 500 }}>📞 {c.phone}</a><span onClick={() => removeContact(i)} style={{ fontSize: 12, color: '#CDD1D9', cursor: 'pointer' }}>×</span></div></div>))}{!addingContact && <button onClick={() => setAddingContact(true)} style={{ fontSize: 11, color: ROYAL, background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', fontWeight: 500 }}>+ Add contact</button>}{addingContact && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}><input placeholder="Name" value={newContact.name} onChange={(e) => setNewContact(p => ({ ...p, name: e.target.value }))} style={{ ...inputStyle, flex: '1 1 80px' }} /><input placeholder="Role" value={newContact.role} onChange={(e) => setNewContact(p => ({ ...p, role: e.target.value }))} style={{ ...inputStyle, flex: '1 1 60px' }} /><input placeholder="Phone" value={newContact.phone} onChange={(e) => setNewContact(p => ({ ...p, phone: e.target.value }))} style={{ ...inputStyle, flex: '1 1 80px' }} /><button onClick={addContact} style={{ fontSize: 11, padding: '6px 12px', borderRadius: 6, border: 'none', background: SAGE, color: 'white', cursor: 'pointer' }}>Add</button><button onClick={() => setAddingContact(false)} style={{ fontSize: 11, padding: '6px 8px', borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: MUTED }}>×</button></div>}</div>}
             {!item.contacts && <div style={{ marginBottom: 8 }}><button onClick={() => setAddingContact(true)} style={{ fontSize: 11, color: ROYAL, background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 0', fontWeight: 500 }}>+ Add contact</button>{addingContact && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}><input placeholder="Name" value={newContact.name} onChange={(e) => setNewContact(p => ({ ...p, name: e.target.value }))} style={{ ...inputStyle, flex: '1 1 80px' }} /><input placeholder="Role" value={newContact.role} onChange={(e) => setNewContact(p => ({ ...p, role: e.target.value }))} style={{ ...inputStyle, flex: '1 1 60px' }} /><input placeholder="Phone" value={newContact.phone} onChange={(e) => setNewContact(p => ({ ...p, phone: e.target.value }))} style={{ ...inputStyle, flex: '1 1 80px' }} /><button onClick={addContact} style={{ fontSize: 11, padding: '6px 12px', borderRadius: 6, border: 'none', background: SAGE, color: 'white', cursor: 'pointer' }}>Add</button><button onClick={() => setAddingContact(false)} style={{ fontSize: 11, padding: '6px 8px', borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: MUTED }}>×</button></div>}</div>}
-            {item.docs && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Documents</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{item.docs.map((d, i) => <span key={i} style={{ fontSize: 12, color: SUBTEXT, background: BG, padding: '5px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>📎 {d}<span onClick={() => removeDoc(i)} style={{ color: '#CDD1D9', cursor: 'pointer', fontSize: 10, marginLeft: 2 }}>×</span></span>)}</div></div>}
+            {item.folderUrl && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Files</div><a href={item.folderUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: ROYAL, background: '#EBF0FA', padding: '6px 12px', borderRadius: 8, border: `1px solid ${ROYAL}30`, textDecoration: 'none', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 6 }}>📁 Open files folder <span style={{ fontSize: 10, opacity: 0.6 }}>↗</span></a></div>}
             {item.links && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>{item.links.map((l, i) => <span key={i} style={{ fontSize: 12, color: ROYAL, background: '#EBF0FA', padding: '5px 10px', borderRadius: 8, cursor: 'pointer', fontWeight: 500 }}>🔗 {l.label}</span>)}</div>}
             <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
               {item.action && <button style={{ fontSize: 12, padding: '7px 16px', borderRadius: 9, border: 'none', cursor: 'pointer', fontWeight: 500, background: TEXT, color: 'white', display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ fontSize: 11 }}>🤖</span> {item.action}</button>}
@@ -538,6 +584,7 @@ function ItemRow({ item, onUpdate, onDelete }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Rhythm</span><input value={draft.rhythm} onChange={(e) => setDraft(p => ({ ...p, rhythm: e.target.value }))} style={inputStyle} placeholder="e.g. Weekly, Annually" /></div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Next</span><input value={draft.next} onChange={(e) => setDraft(p => ({ ...p, next: e.target.value }))} style={inputStyle} placeholder="e.g. 15 Apr, Tue 15 Apr, Jul 2026" /></div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Action</span><input value={draft.action} onChange={(e) => setDraft(p => ({ ...p, action: e.target.value }))} style={inputStyle} placeholder="e.g. Book appointment" /></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Files 📁</span><input value={draft.folderUrl} onChange={(e) => setDraft(p => ({ ...p, folderUrl: e.target.value }))} style={inputStyle} placeholder="Paste Google Drive or folder link" /></div>
             </div>
             <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Notes</div><textarea value={draft.notes} onChange={(e) => setDraft(p => ({ ...p, notes: e.target.value }))} rows={3} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, resize: 'vertical', outline: 'none', boxSizing: 'border-box', fontFamily: "'Outfit', sans-serif" }} /></div>
             {Object.keys(draft.details).length > 0 && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Details</div>{Object.entries(draft.details).map(([k, v]) => (<div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}><label style={{ fontSize: 12, color: SUBTEXT, width: 90, textTransform: 'capitalize', flexShrink: 0 }}>{k.replace(/([A-Z])/g, ' $1').trim()}</label><input value={v} onChange={(e) => setDraft(p => ({ ...p, details: { ...p.details, [k]: e.target.value } }))} style={inputStyle} /></div>))}</div>}
@@ -554,14 +601,16 @@ function ItemRow({ item, onUpdate, onDelete }) {
 // ===========================================
 function AddItemForm({ onAdd }) {
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState({ name: '', owner: 'Chloë', rhythm: '', next: '', status: 'handled', notes: '' });
+  const [draft, setDraft] = useState({ name: '', owner: 'Chloë', rhythm: '', next: '', status: 'handled', notes: '', folderUrl: '' });
   const inputStyle = { flex: 1, padding: '8px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, outline: 'none', fontFamily: "'Outfit', sans-serif" };
   const labelStyle = { fontSize: 11, color: MUTED, width: 60, flexShrink: 0, fontWeight: 500 };
 
   const submit = () => {
     if (!draft.name.trim()) return;
-    onAdd({ ...draft, name: draft.name.trim() });
-    setDraft({ name: '', owner: 'Chloë', rhythm: '', next: '', status: 'handled', notes: '' });
+    const payload = { ...draft, name: draft.name.trim(), folderUrl: draft.folderUrl.trim() };
+    if (!payload.folderUrl) delete payload.folderUrl;
+    onAdd(payload);
+    setDraft({ name: '', owner: 'Chloë', rhythm: '', next: '', status: 'handled', notes: '', folderUrl: '' });
     setOpen(false);
   };
 
@@ -575,6 +624,7 @@ function AddItemForm({ onAdd }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Status</span><div style={{ display: 'flex', gap: 4 }}>{STATUS_OPTIONS.map(s => <Pill key={s} label={STATUS_CONFIG[s].label} active={draft.status === s} color={STATUS_CONFIG[s].color} onClick={() => setDraft(p => ({ ...p, status: s }))} />)}</div></div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Rhythm</span><input value={draft.rhythm} onChange={(e) => setDraft(p => ({ ...p, rhythm: e.target.value }))} style={inputStyle} placeholder="e.g. Annually, Weekly" /></div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Next</span><input value={draft.next} onChange={(e) => setDraft(p => ({ ...p, next: e.target.value }))} style={inputStyle} placeholder="e.g. 15 Apr, Tue 15 Apr, Jul 2026" /></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Files 📁</span><input value={draft.folderUrl} onChange={(e) => setDraft(p => ({ ...p, folderUrl: e.target.value }))} style={inputStyle} placeholder="Paste Google Drive or folder link (optional)" /></div>
         <textarea value={draft.notes} onChange={(e) => setDraft(p => ({ ...p, notes: e.target.value }))} rows={2} placeholder="Notes (optional)" style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, resize: 'vertical', outline: 'none', boxSizing: 'border-box', fontFamily: "'Outfit', sans-serif" }} />
       </div>
       <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
@@ -892,6 +942,7 @@ function ListsTab({ meals, setMeals, saveMeals, weekly, setWeekly, saveWeekly, m
 export default function LifeOS({ session }) {
   const [view, setView] = useState('today');
   const [selectedCat, setSelectedCat] = useState(null);
+  const [manualOpen, setManualOpen] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -1044,8 +1095,8 @@ export default function LifeOS({ session }) {
               const nl = cat.items.filter((i) => i.status === 'needs-love').length;
               const hu = cat.items.filter((i) => i.status === 'heads-up').length;
               const allGood = nl === 0 && hu === 0;
-              const ta = cat.items.reduce((a, i) => a + (i.docs?.length || 0) + (i.contacts?.length || 0), 0);
-              return (<button key={key} onClick={() => setSelectedCat(key)} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: '18px 16px', textAlign: 'left', cursor: 'pointer' }}><div style={{ fontSize: 24, marginBottom: 6 }}>{cat.emoji}</div><div style={{ fontSize: 14, fontWeight: 600, color: TEXT }}>{cat.label}</div><div style={{ fontSize: 12, color: MUTED, marginTop: 2 }}>{cat.items.length} items{ta > 0 && ` · ${ta} 📎`}</div><div style={{ fontSize: 11, marginTop: 4 }}>{allGood ? <span style={{ color: SAGE }}>All good ✓</span> : nl > 0 ? <span style={{ color: CORAL }}>💛 {nl}</span> : <span style={{ color: PURPLE }}>👀 {hu}</span>}</div></button>);
+              const ta = cat.items.reduce((a, i) => a + (i.folderUrl ? 1 : 0) + (i.contacts?.length || 0), 0);
+              return (<button key={key} onClick={() => setSelectedCat(key)} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: '18px 16px', textAlign: 'left', cursor: 'pointer' }}><div style={{ fontSize: 24, marginBottom: 6 }}>{cat.emoji}</div><div style={{ fontSize: 14, fontWeight: 600, color: TEXT }}>{cat.label}</div><div style={{ fontSize: 12, color: MUTED, marginTop: 2 }}>{cat.items.length} items{ta > 0 && ` · ${ta} 🔗`}</div><div style={{ fontSize: 11, marginTop: 4 }}>{allGood ? <span style={{ color: SAGE }}>All good ✓</span> : nl > 0 ? <span style={{ color: CORAL }}>💛 {nl}</span> : <span style={{ color: PURPLE }}>👀 {hu}</span>}</div></button>);
             })}
           </div>
         </>)}
@@ -1066,7 +1117,106 @@ export default function LifeOS({ session }) {
         {/* ========= MANUAL TAB ========= */}
         {view === 'manual' && (<>
           <div style={{ padding: 22, background: `linear-gradient(135deg, ${TEXT}, #2E3548)`, borderRadius: 20, marginBottom: 16, color: 'white' }}><h3 style={{ fontSize: 20, fontFamily: "'Fraunces', serif", fontWeight: 600, margin: '0 0 6px' }}>The Manual</h3><p style={{ fontSize: 13, margin: 0, opacity: 0.8, lineHeight: 1.5 }}>Everything someone would need to keep your life running.</p></div>
-          {[{ emoji: '📞', title: 'Key contacts', desc: `${allItems.reduce((a, i) => a + (i.contacts?.length || 0), 0)} contacts stored` }, { emoji: '📎', title: 'Documents & files', desc: `${allItems.reduce((a, i) => a + (i.docs?.length || 0), 0)} documents stored` }, { emoji: '🔄', title: 'What recurs and who owns it', desc: `${allItems.length} items across ${Object.keys(registry).length} categories` }, { emoji: '👦', title: "Kids' routines + sizes", desc: 'School, pick-ups, lessons, medical, clothing' }, { emoji: '💳', title: 'Financial overview', desc: 'Accounts, insurance, investments, tax' }, { emoji: '🔐', title: 'Account access', desc: 'Password manager, shared accounts' }].map((s, i) => (<div key={i} style={{ padding: '14px 16px', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14 }}><span style={{ fontSize: 22 }}>{s.emoji}</span><div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 600 }}>{s.title}</div><div style={{ fontSize: 12, color: MUTED, marginTop: 1 }}>{s.desc}</div></div><span style={{ color: '#CDD1D9', fontSize: 14 }}>→</span></div>))}
+          {(() => {
+            const contactCount = allItems.reduce((a, i) => a + (i.contacts?.length || 0), 0);
+            const folderCount = allItems.reduce((a, i) => a + (i.folderUrl ? 1 : 0), 0);
+            const sections = [
+              { id: 'contacts', emoji: '📞', title: 'Key contacts', desc: `${contactCount} contacts stored` },
+              { id: 'files', emoji: '📁', title: 'Files & folders', desc: folderCount > 0 ? `${folderCount} folder links saved` : 'No folder links yet' },
+              { id: 'recurring', emoji: '🔄', title: 'What recurs and who owns it', desc: `${allItems.length} items across ${Object.keys(registry).length} categories` },
+              { id: 'kids', emoji: '👦', title: "Kids' routines + sizes", desc: 'School, pick-ups, lessons, medical, clothing' },
+              { id: 'finance', emoji: '💳', title: 'Financial overview', desc: 'Accounts, insurance, investments, tax' },
+              { id: 'access', emoji: '🔐', title: 'Account access', desc: 'Password manager, shared accounts' },
+            ];
+            return sections.map((s) => {
+              const isOpen = manualOpen === s.id;
+              return (
+                <div key={s.id} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, marginBottom: 8, overflow: 'hidden' }}>
+                  <div onClick={() => setManualOpen(isOpen ? null : s.id)} style={{ padding: '14px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <span style={{ fontSize: 22 }}>{s.emoji}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>{s.title}</div>
+                      <div style={{ fontSize: 12, color: MUTED, marginTop: 1 }}>{s.desc}</div>
+                    </div>
+                    <span style={{ color: MUTED, fontSize: 12, transform: isOpen ? 'rotate(90deg)' : '', transition: 'transform 0.2s' }}>→</span>
+                  </div>
+                  {isOpen && (
+                    <div style={{ padding: '0 16px 14px', borderTop: `1px solid ${BORDER}`, paddingTop: 12 }}>
+                      {s.id === 'contacts' && (() => {
+                        const rows = allItems.flatMap((i) => (i.contacts || []).map((c) => ({ ...c, source: i.name })));
+                        if (rows.length === 0) return <div style={{ fontSize: 12, color: MUTED, fontStyle: 'italic' }}>No contacts saved yet. Add them from any registry item.</div>;
+                        return rows.map((c, i) => (
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0', borderBottom: i < rows.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
+                            <div><div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{c.name}</div><div style={{ fontSize: 11, color: MUTED }}>{c.role} · {c.source}</div></div>
+                            {c.phone && <a href={`tel:${c.phone}`} style={{ fontSize: 12, color: ROYAL, textDecoration: 'none', fontWeight: 500 }}>📞 {c.phone}</a>}
+                          </div>
+                        ));
+                      })()}
+
+                      {s.id === 'files' && (() => {
+                        const rows = allItems.filter((i) => i.folderUrl);
+                        if (rows.length === 0) return <div style={{ fontSize: 12, color: MUTED, fontStyle: 'italic' }}>No folder links yet. Edit a registry item and paste a Google Drive or folder link.</div>;
+                        return rows.map((it, i) => (
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0', borderBottom: i < rows.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
+                            <div style={{ fontSize: 13, color: TEXT }}>{it.name}<span style={{ fontSize: 11, color: MUTED, marginLeft: 6 }}>{registry[it.catKey]?.label}</span></div>
+                            <a href={it.folderUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: ROYAL, textDecoration: 'none', fontWeight: 500 }}>📁 Open ↗</a>
+                          </div>
+                        ));
+                      })()}
+
+                      {s.id === 'recurring' && (() => {
+                        const recurring = allItems.filter((i) => i.rhythm && !['—', 'As needed', 'Ad hoc'].includes(i.rhythm));
+                        if (recurring.length === 0) return <div style={{ fontSize: 12, color: MUTED, fontStyle: 'italic' }}>Nothing recurring yet.</div>;
+                        const byOwner = { 'Chloë': [], 'Cameron': [], 'Both': [], 'Other': [] };
+                        recurring.forEach((i) => { (byOwner[i.owner] || byOwner.Other).push(i); });
+                        return Object.entries(byOwner).map(([owner, items]) => items.length === 0 ? null : (
+                          <div key={owner} style={{ marginBottom: 10 }}>
+                            <div style={{ fontSize: 10, fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{owner} ({items.length})</div>
+                            {items.map((it, i) => (
+                              <div key={i} style={{ fontSize: 12, color: SUBTEXT, padding: '4px 0' }}>
+                                <span style={{ color: TEXT, fontWeight: 500 }}>{it.name}</span> · {it.rhythm}{it.next && it.next !== '—' && <span style={{ color: MUTED }}> · next {it.next}</span>}
+                              </div>
+                            ))}
+                          </div>
+                        ));
+                      })()}
+
+                      {s.id === 'kids' && (() => {
+                        const kidsItems = registry.kids?.items || [];
+                        if (kidsItems.length === 0) return <div style={{ fontSize: 12, color: MUTED, fontStyle: 'italic' }}>No kids section in registry.</div>;
+                        return kidsItems.map((it, i) => (
+                          <div key={i} style={{ padding: '8px 0', borderBottom: i < kidsItems.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
+                            <div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{it.name}</div>
+                            {it.details && <div style={{ fontSize: 11, color: SUBTEXT, marginTop: 2 }}>{Object.entries(it.details).map(([k, v]) => `${k}: ${v}`).join(' · ')}</div>}
+                            {it.notes && <div style={{ fontSize: 11, color: MUTED, marginTop: 2, fontStyle: 'italic' }}>{it.notes}</div>}
+                          </div>
+                        ));
+                      })()}
+
+                      {s.id === 'finance' && (() => {
+                        const finItems = [...(registry.finance?.items || []), ...(registry.rentals?.items || [])];
+                        if (finItems.length === 0) return <div style={{ fontSize: 12, color: MUTED, fontStyle: 'italic' }}>No finance items yet.</div>;
+                        return finItems.map((it, i) => (
+                          <div key={i} style={{ padding: '7px 0', borderBottom: i < finItems.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
+                            <div style={{ fontSize: 13, color: TEXT, fontWeight: 500 }}>{it.name}</div>
+                            <div style={{ fontSize: 11, color: MUTED }}>{it.owner} · {it.rhythm}{it.next && it.next !== '—' && ` · ${it.next}`}</div>
+                            {it.notes && <div style={{ fontSize: 11, color: SUBTEXT, marginTop: 2, fontStyle: 'italic' }}>{it.notes}</div>}
+                          </div>
+                        ));
+                      })()}
+
+                      {s.id === 'access' && (
+                        <div style={{ fontSize: 12, color: SUBTEXT, lineHeight: 1.6 }}>
+                          <div style={{ marginBottom: 6 }}>Add your shared-access info as a registry item under <strong>Other</strong> or <strong>Documents</strong>, with a Google Drive link to your password manager export or shared login doc.</div>
+                          <div style={{ color: MUTED, fontStyle: 'italic' }}>Coming in a later phase: a dedicated secure access section.</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            });
+          })()}
         </>)}
       </div>
     </div>
