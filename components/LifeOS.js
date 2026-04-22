@@ -43,42 +43,42 @@ const DEFAULT_REGISTRY = {
     { name: 'Vacuum filters', status: 'heads-up', owner: 'Chloë', rhythm: 'Every 3 months', next: 'Apr 20', notes: 'Dyson V15 SV22.', links: [{ label: 'Order filters', url: '#' }] },
   ]},
   vehicles: { label: 'Vehicles', emoji: '🚗', items: [
-    { name: 'Jimny', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Jul 2026', contacts: [{ name: 'Suzuki Tygerberg', role: 'Dealer', phone: '021 XXX XXXX' }], notes: '38,400km. Service plan to 60k/2028.', docs: ['Service book', 'Insurance cert', 'Service history'], details: { reg: 'CA XXX XXX', colour: 'Kinetic Yellow' } },
+    { name: 'Jimny', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Jul 2026', contacts: [{ name: 'Suzuki Tygerberg', role: 'Dealer', phone: '021 XXX XXXX' }], notes: '38,400km. Service plan to 60k/2028.', details: { reg: 'CA XXX XXX', colour: 'Kinetic Yellow' } },
     { name: 'Jimny licence disk', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Sep 2026', links: [{ label: 'WC eServices', url: '#' }] },
-    { name: "Cameron's car", status: 'heads-up', owner: 'Cameron', rhythm: 'Annually', next: 'Service due May 2026', docs: ['Service book', 'Insurance cert'], action: 'Book service' },
+    { name: "Cameron's car", status: 'heads-up', owner: 'Cameron', rhythm: 'Annually', next: 'Service due May 2026', action: 'Book service' },
   ]},
   kids: { label: 'Tom & Luke', emoji: '👦', items: [
     { name: 'Tom (13)', status: 'handled', owner: 'Both', rhythm: '—', next: '—', notes: 'No allergies. Discovery Coastal.', details: { age: '13', school: 'Grade 8', shoeSize: 'UK 7', clothing: '13-14 / Men S', nonUniform: 'Jeans 28, T-shirt S' }, contacts: [{ name: 'Dr van der Merwe', role: 'Dentist', phone: '021 XXX' }] },
     { name: 'Luke (11)', status: 'handled', owner: 'Both', rhythm: '—', next: '—', notes: 'Slight astigmatism left eye.', details: { age: '11', school: 'Grade 6', shoeSize: 'UK 5', clothing: '11-12 yrs', nonUniform: 'Jeans 26, T-shirt 11-12' }, contacts: [{ name: 'Spec-Savers', role: 'Optom', phone: '021 XXX' }] },
     { name: 'Tom dentist', status: 'needs-love', owner: 'Chloë', rhythm: 'Annually', next: 'Was due Feb 2026', action: 'Book appointment' },
     { name: 'Luke eye test', status: 'heads-up', owner: 'Chloë', rhythm: 'Annually', next: 'Apr 2026', action: 'Book appointment' },
-    { name: 'School fees Term 2', status: 'handled', owner: 'Cameron', rhythm: 'Per term', next: 'Paid ✓', docs: ['Invoice', 'Payment proof'] },
+    { name: 'School fees Term 2', status: 'handled', owner: 'Cameron', rhythm: 'Per term', next: 'Paid ✓' },
     { name: 'Extra maths (Tom)', status: 'handled', owner: 'Chloë', rhythm: 'Weekly Tue', next: 'Tue 15 Apr', contacts: [{ name: 'Mrs Jacobs', role: 'Tutor', phone: '083 XXX' }], notes: 'R450/session. Tuesdays 3:30pm.' },
     { name: 'Cricket (Luke)', status: 'handled', owner: 'Cameron', rhythm: 'Weekly Sat', next: 'Sat 19 Apr' },
     { name: 'School uniforms', status: 'handled', owner: 'Chloë', rhythm: 'As needed', next: 'Check start of term', notes: 'Tom: blazer 13-14, shirt 38, shorts 30. Luke: blazer 11-12, shirt 34, shorts 28.' },
   ]},
   health: { label: 'Health', emoji: '🩺', items: [
-    { name: 'Chloë bloods', status: 'heads-up', owner: 'Chloë', rhythm: 'Bi-annual', next: 'Apr 2026', contacts: [{ name: 'Pathcare Newlands', role: 'Lab', phone: '021 XXX' }], docs: ['Results Oct 2025'], action: 'Book bloods' },
+    { name: 'Chloë bloods', status: 'heads-up', owner: 'Chloë', rhythm: 'Bi-annual', next: 'Apr 2026', contacts: [{ name: 'Pathcare Newlands', role: 'Lab', phone: '021 XXX' }], action: 'Book bloods' },
     { name: 'Chloë hygienist', status: 'handled', owner: 'Chloë', rhythm: 'Twice yearly', next: 'Jun 2026' },
-    { name: 'Chloë mole mapping', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Nov 2026', docs: ['Report Nov 2025'] },
+    { name: 'Chloë mole mapping', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Nov 2026' },
     { name: 'Cameron GP', status: 'needs-love', owner: 'Cameron', rhythm: 'Annually', next: 'Was due Jan 2026', contacts: [{ name: 'Dr Pillay', role: 'GP', phone: '021 XXX' }], action: 'Book check-up' },
     { name: 'Cameron dentist', status: 'handled', owner: 'Cameron', rhythm: 'Annually', next: 'Aug 2026' },
   ]},
   finance: { label: 'Finance & Legal', emoji: '💰', items: [
-    { name: 'UK tax filing', status: 'heads-up', owner: 'Chloë', rhythm: 'Annually', next: 'Due Jul 2026', contacts: [{ name: 'James', role: 'UK tax', phone: '+44 XXX' }], docs: ["Last year's return"], action: 'Schedule call' },
+    { name: 'UK tax filing', status: 'heads-up', owner: 'Chloë', rhythm: 'Annually', next: 'Due Jul 2026', contacts: [{ name: 'James', role: 'UK tax', phone: '+44 XXX' }], action: 'Schedule call' },
     { name: 'SA financial advisor', status: 'needs-love', owner: 'Chloë', rhythm: 'Bi-annual', next: 'Was due Mar 2026', contacts: [{ name: 'Mark (Dovetail)', role: 'FA', phone: '082 XXX' }], action: 'Schedule call' },
-    { name: 'Wills update', status: 'needs-love', owner: 'Both', rhythm: 'Every 2 years', next: 'Last updated 2023', docs: ['Current wills (2023)'], action: 'Book appointment' },
+    { name: 'Wills update', status: 'needs-love', owner: 'Both', rhythm: 'Every 2 years', next: 'Last updated 2023', action: 'Book appointment' },
     { name: 'Monthly budget', status: 'handled', owner: 'Both', rhythm: 'Monthly', next: 'May 1', links: [{ label: 'Budget sheet', url: '#' }] },
   ]},
   documents: { label: 'Documents', emoji: '📄', items: [
-    { name: 'Chloë SA passport', status: 'handled', owner: 'Chloë', rhythm: '10 years', next: 'Expires 2031', details: { number: 'AXXXXXXX', expires: '2031' }, docs: ['Scan'] },
-    { name: 'Chloë UK passport', status: 'heads-up', owner: 'Chloë', rhythm: '10 years', next: 'Expires Dec 2026', notes: '6-month rule. Unusable from Jun 2026.', docs: ['Scan'], action: 'Start renewal' },
+    { name: 'Chloë SA passport', status: 'handled', owner: 'Chloë', rhythm: '10 years', next: 'Expires 2031', details: { number: 'AXXXXXXX', expires: '2031' } },
+    { name: 'Chloë UK passport', status: 'heads-up', owner: 'Chloë', rhythm: '10 years', next: 'Expires Dec 2026', notes: '6-month rule. Unusable from Jun 2026.', action: 'Start renewal' },
     { name: 'Cameron NZ passport', status: 'handled', owner: 'Cameron', rhythm: '10 years', next: 'Expires 2029' },
     { name: 'Tom SA passport', status: 'handled', owner: 'Chloë', rhythm: '5 years', next: 'Expires 2028', notes: 'Also NZ, UK, Finnish.' },
     { name: 'Luke SA passport', status: 'handled', owner: 'Chloë', rhythm: '5 years', next: 'Expires 2028', notes: 'Also NZ, UK, Finnish.' },
   ]},
   rentals: { label: 'Rentals', emoji: '🏘️', items: [
-    { name: 'Property 1', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Lease Oct 2026', contacts: [{ name: 'Sarah', role: 'Tenant', phone: '079 XXX' }], docs: ['Lease', 'Deposit receipt'], notes: 'R12,500/m auto debit.' },
+    { name: 'Property 1', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Lease Oct 2026', contacts: [{ name: 'Sarah', role: 'Tenant', phone: '079 XXX' }], notes: 'R12,500/m auto debit.' },
     { name: 'Property 2 geyser', status: 'heads-up', owner: 'Chloë', rhythm: 'Ad hoc', next: 'Flagged by tenant', contacts: [{ name: 'Johan', role: 'Tenant', phone: '082 XXX' }, { name: 'Dave', role: 'Plumber', phone: '073 XXX' }], action: 'Call plumber' },
   ]},
   equipment: { label: 'Equipment', emoji: '🚲', items: [
@@ -90,8 +90,8 @@ const DEFAULT_REGISTRY = {
     { name: "Cameron's mom birthday", status: 'heads-up', owner: 'Both', rhythm: 'Annual', next: 'Apr 28', notes: 'Last year: Jonkershuis lunch.', action: 'Get gift sorted' },
   ]},
   appliances: { label: 'Appliances', emoji: '🔌', items: [
-    { name: 'Fridge', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Warranty 2028', details: { brand: 'Samsung', model: 'RF28XXXXX', purchased: '2023' }, docs: ['Warranty', 'Receipt'] },
-    { name: 'Washing machine', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Warranty 2027', details: { brand: 'LG', purchased: '2022' }, docs: ['Warranty'] },
+    { name: 'Fridge', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Warranty 2028', details: { brand: 'Samsung', model: 'RF28XXXXX', purchased: '2023' } },
+    { name: 'Washing machine', status: 'handled', owner: 'Chloë', rhythm: 'Annually', next: 'Warranty 2027', details: { brand: 'LG', purchased: '2022' } },
     { name: 'Oven', status: 'heads-up', owner: 'Cameron', rhythm: 'Annually', next: 'May 2026', details: { brand: 'Smeg' }, action: 'Book service' },
   ]},
   other: { label: 'Other', emoji: '📌', items: [{ name: 'Add anything here', status: 'handled', owner: '—', rhythm: '—', next: '—', notes: 'Catch-all.' }] },
@@ -130,117 +130,6 @@ const DEFAULT_WEEKLY = {
 };
 const DEFAULT_MONTHLY = [{ id: 30, text: 'Washing powder', checked: false }, { id: 31, text: 'Olive oil', checked: false }, { id: 32, text: 'Cling wrap', checked: false }];
 const DEFAULT_TOBUY = [{ id: 40, text: 'Tom cricket whites (13-14)', checked: false }, { id: 41, text: 'Luke school shoes (UK 5)', checked: false }, { id: 42, text: "Cameron's mom gift", checked: false }, { id: 43, text: 'Dyson filters x2', checked: false }];
-
-// ===========================================
-// WEEK ROLLOVER HELPERS
-// ===========================================
-// Returns the Monday (00:00 local) of the week containing the given date.
-// Sunday is treated as the LAST day of the previous week (so getDay()===0 -> go back 6 days).
-function getMondayOfWeek(date) {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  const dow = d.getDay();
-  const daysToMonday = dow === 0 ? -6 : 1 - dow;
-  d.setDate(d.getDate() + daysToMonday);
-  return d;
-}
-
-function toIsoDate(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
-// Blank templates used when rolling forward — preserve shape, clear content
-const BLANK_EXERCISE_WEEK = () => Array.from({ length: 7 }, (_, i) => ({
-  day: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i], date: '', entries: [],
-}));
-const BLANK_SOCIAL_WEEK = () => Array.from({ length: 7 }, (_, i) => ({
-  day: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i], date: '', entries: [],
-}));
-const BLANK_KID_LOGISTICS_WEEK = () => Array.from({ length: 5 }, (_, i) => ({
-  day: ['Mon','Tue','Wed','Thu','Fri'][i], date: '', dropoff: '—', pickup: '—', notes: '',
-}));
-const BLANK_MEALS_WEEK = () => ([
-  { day: 'Sunday', meal: '', who: '—' },
-  { day: 'Monday', meal: '', who: '—' },
-  { day: 'Tuesday', meal: '', who: '—' },
-  { day: 'Wednesday', meal: '', who: '—' },
-  { day: 'Thursday', meal: '', who: '—' },
-  { day: 'Friday', meal: '', who: '—' },
-  { day: 'Saturday', meal: '', who: '—' },
-]);
-const BLANK_CUSTODY_WEEK = () => ([
-  { day: 'M', loc: 'N' }, { day: 'T', loc: 'N' }, { day: 'W', loc: 'N' },
-  { day: 'T', loc: 'N' }, { day: 'F', loc: 'N' }, { day: 'S', loc: 'N' }, { day: 'S', loc: 'N' },
-]);
-
-// Rolls a {thisWeek, nextWeek} structure forward by `weeks` weeks.
-// 1 week: thisWeek <- nextWeek, nextWeek <- blank
-// 2+ weeks: both blank
-function rollWeeks(obj, weeks, blankFn) {
-  if (!obj || weeks <= 0) return obj;
-  if (weeks === 1) {
-    return { thisWeek: obj.nextWeek || blankFn(), nextWeek: blankFn() };
-  }
-  return { thisWeek: blankFn(), nextWeek: blankFn() };
-}
-
-// Checks the stored week anchor against today's real Monday. If the real Monday
-// has moved forward, rolls all four schedules forward by that many weeks and
-// saves the new anchor. Returns the (possibly new) data objects.
-//
-// First-run behaviour (no stored anchor yet): rolls the stored schedules
-// forward by ONE week. This is a one-time migration — stored content was
-// entered "as this week" before rollover existed, so on the first open after
-// this deploy we treat it as last week and roll it forward.
-async function applyWeekRollover({ exercise, socialSched, kidLogistics, meals, custody }) {
-  const realMonday = getMondayOfWeek(new Date());
-  const realMondayIso = toIsoDate(realMonday);
-
-  const { data } = await supabase.from('app_data').select('value').eq('key', 'week_anchor').single();
-  const storedIso = data?.value?.monday;
-
-  let diffWeeks;
-  if (!storedIso) {
-    // One-time migration: treat stored data as last week's content.
-    diffWeeks = 1;
-  } else {
-    const storedMonday = new Date(storedIso + 'T00:00:00');
-    const diffMs = realMonday.getTime() - storedMonday.getTime();
-    diffWeeks = Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
-  }
-
-  if (diffWeeks <= 0) {
-    return { exercise, socialSched, kidLogistics, meals, custody, rolled: false };
-  }
-
-  // Roll forward
-  const newExercise = rollWeeks(exercise, diffWeeks, BLANK_EXERCISE_WEEK);
-  const newSocial = rollWeeks(socialSched, diffWeeks, BLANK_SOCIAL_WEEK);
-  const newKidLog = rollWeeks(kidLogistics, diffWeeks, BLANK_KID_LOGISTICS_WEEK);
-  const newMeals = rollWeeks(meals, diffWeeks, BLANK_MEALS_WEEK);
-  const newCustody = rollWeeks(custody, diffWeeks, BLANK_CUSTODY_WEEK);
-
-  await Promise.all([
-    saveData('exercise_schedule', newExercise),
-    saveData('social_schedule', newSocial),
-    saveData('kid_logistics', newKidLog),
-    saveData('meals', newMeals),
-    saveData('custody', newCustody),
-    saveData('week_anchor', { monday: realMondayIso }),
-  ]);
-
-  return {
-    exercise: newExercise,
-    socialSched: newSocial,
-    kidLogistics: newKidLog,
-    meals: newMeals,
-    custody: newCustody,
-    rolled: true,
-  };
-}
 
 // Dynamic week view builder - aggregates data from all sources
 function buildWeekView(weekKey, { meals, exercise, socialSched, kidLogistics, custody, registry }) {
@@ -287,16 +176,11 @@ function buildWeekView(weekKey, { meals, exercise, socialSched, kidLogistics, cu
       }
     }
 
-    // 2. Meals (dinner + cook) — Sunday-precedes-Monday semantic:
-    //    Mon-Sat pull from the current week's meals.
-    //    Sun pulls from the NEXT week's Sunday entry (because that Sunday precedes the next Monday).
+    // 2. Meals (dinner + cook) - handle both old (array) and new ({thisWeek, nextWeek}) shapes
     if (meals) {
-      const mealsForCurrentWeek = Array.isArray(meals) ? meals : meals[weekKey];
-      const nextWeekKey = weekKey === 'thisWeek' ? 'nextWeek' : null;
-      const mealsForNextWeek = nextWeekKey && !Array.isArray(meals) ? meals[nextWeekKey] : null;
-      const source = dayFull === 'Sunday' ? (mealsForNextWeek || mealsForCurrentWeek) : mealsForCurrentWeek;
-      if (source) {
-        const meal = source.find(m => m.day === dayFull);
+      const mealsForWeek = Array.isArray(meals) ? meals : meals[weekKey];
+      if (mealsForWeek) {
+        const meal = mealsForWeek.find(m => m.day === dayFull);
         if (meal && meal.meal) {
           tags.push({ text: `🍽️ ${meal.meal}`, color: COLORS.shared });
           if (meal.who && meal.who !== '—') {
@@ -422,6 +306,7 @@ async function loadData(key, fallback) {
   const { data } = await supabase.from('app_data').select('value').eq('key', key).single();
   if (data) {
     // Migration: registry - backfill stable _id on every item (needed for React keying)
+    // + strip legacy `docs` arrays (replaced by `folderUrl` in Phase 2.1)
     if (key === 'registry' && data.value) {
       let changed = false;
       const migrated = { ...data.value };
@@ -429,11 +314,17 @@ async function loadData(key, fallback) {
         migrated[catKey] = {
           ...migrated[catKey],
           items: migrated[catKey].items.map((item, i) => {
-            if (!item._id) {
+            let next = item;
+            if (!next._id) {
               changed = true;
-              return { ...item, _id: `${Date.now()}-${catKey}-${i}-${Math.random().toString(36).slice(2, 6)}` };
+              next = { ...next, _id: `${Date.now()}-${catKey}-${i}-${Math.random().toString(36).slice(2, 6)}` };
             }
-            return item;
+            if (next.docs !== undefined) {
+              changed = true;
+              const { docs, ...rest } = next;
+              next = rest;
+            }
+            return next;
           }),
         };
       });
@@ -524,13 +415,21 @@ function DateFormatTip() {
       </div>
       {open && (
         <div style={{ padding: '0 12px 12px', fontSize: 12, color: SUBTEXT, lineHeight: 1.55 }}>
-          Items with a <strong>Next</strong> date auto-appear in your weekly view on Today tab. Use these formats:
-          <ul style={{ margin: '6px 0 0 0', paddingLeft: 18 }}>
-            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>15 Apr</code> or <code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Apr 15</code> — appears on that day</li>
-            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Tue 15 Apr</code> — also works</li>
-            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Jul 2026</code>, <code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Expires 2028</code> — shown as-is in the item, no auto-day matching</li>
+          Items auto-appear in your weekly view on the Today tab using this order:
+          <div style={{ marginTop: 6, fontWeight: 600, color: TEXT, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>1. Rhythm (weekly recurrence)</div>
+          <ul style={{ margin: '3px 0 0 0', paddingLeft: 18 }}>
+            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Mon/Wed/Thu</code> — every Mon, Wed, Thu</li>
+            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Weekly Tue</code> — every Tuesday</li>
           </ul>
-          <div style={{ marginTop: 6, fontStyle: 'italic', color: MUTED, fontSize: 11 }}>Avoid: "Monday 14 April 2026", "next Tuesday", "April"</div>
+          <div style={{ marginTop: 8, fontWeight: 600, color: TEXT, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>2. Birthdays / anniversaries (auto-annual)</div>
+          <div style={{ marginTop: 3 }}>People & Social items with "birthday" or "anniversary" in the name match on month+date every year (🎂).</div>
+          <div style={{ marginTop: 8, fontWeight: 600, color: TEXT, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>3. One-off date (Next field)</div>
+          <ul style={{ margin: '3px 0 0 0', paddingLeft: 18 }}>
+            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>15 Apr</code> or <code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Apr 15</code> — on that day</li>
+            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Tue 15 Apr</code> — day prefix must match</li>
+            <li><code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Jul 2026</code>, <code style={{ background: CARD, padding: '1px 5px', borderRadius: 3 }}>Paid ✓</code> — shown as-is, no auto-matching</li>
+          </ul>
+          <div style={{ marginTop: 8, fontStyle: 'italic', color: MUTED, fontSize: 11 }}>Avoid: "Monday 14 April 2026", "next Tuesday", just "April"</div>
         </div>
       )}
     </div>
@@ -560,13 +459,23 @@ function ItemRow({ item, onUpdate, onDelete }) {
     setEditing(true);
     setDraft({
       name: item.name || '', owner: item.owner || '', rhythm: item.rhythm || '', next: item.next || '',
-      notes: item.notes || '', action: item.action || '',
+      notes: item.notes || '', action: item.action || '', folderUrl: item.folderUrl || '',
       details: item.details ? { ...item.details } : {},
     });
   };
 
   const saveEdit = () => {
-    const updated = { ...item, name: draft.name, owner: draft.owner, rhythm: draft.rhythm, next: draft.next, notes: draft.notes, action: draft.action || undefined, details: Object.keys(draft.details).length > 0 ? draft.details : item.details };
+    const updated = {
+      ...item,
+      name: draft.name, owner: draft.owner, rhythm: draft.rhythm, next: draft.next,
+      notes: draft.notes, action: draft.action || undefined,
+      details: Object.keys(draft.details).length > 0 ? draft.details : item.details,
+    };
+    if (draft.folderUrl && draft.folderUrl.trim()) {
+      updated.folderUrl = draft.folderUrl.trim();
+    } else {
+      delete updated.folderUrl;
+    }
     setEditing(false); if (onUpdate) onUpdate(updated);
   };
 
@@ -586,12 +495,6 @@ function ItemRow({ item, onUpdate, onDelete }) {
     setNewContact({ name: '', role: '', phone: '' }); setAddingContact(false);
   };
 
-  const removeDoc = (idx) => {
-    const updated = { ...item, docs: item.docs.filter((_, i) => i !== idx) };
-    if (updated.docs.length === 0) delete updated.docs;
-    if (onUpdate) onUpdate(updated);
-  };
-
   const addDetail = () => {
     const key = prompt('Detail name (e.g. "brand", "model"):');
     if (!key) return;
@@ -602,7 +505,7 @@ function ItemRow({ item, onUpdate, onDelete }) {
     if (onUpdate) onUpdate(updated);
   };
 
-  const hasRich = item.contacts || item.docs || item.links || item.details || item.notes;
+  const hasRich = item.contacts || item.folderUrl || item.links || item.details || item.notes;
   const inputStyle = { flex: 1, padding: '6px 10px', borderRadius: 6, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, outline: 'none', fontFamily: "'Outfit', sans-serif" };
   const labelStyle = { fontSize: 11, color: MUTED, width: 60, flexShrink: 0, fontWeight: 500 };
 
@@ -615,7 +518,7 @@ function ItemRow({ item, onUpdate, onDelete }) {
             <div style={{ fontSize: 12, color: MUTED, marginTop: 3 }}>{item.owner} · {item.rhythm} · {item.next}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {hasRich && !open && <div style={{ display: 'flex', gap: 2 }}>{item.contacts && <span style={{ fontSize: 10, opacity: 0.4 }}>📞</span>}{item.docs && <span style={{ fontSize: 10, opacity: 0.4 }}>📎</span>}</div>}
+            {hasRich && !open && <div style={{ display: 'flex', gap: 2 }}>{item.contacts && <span style={{ fontSize: 10, opacity: 0.4 }}>📞</span>}{item.folderUrl && <span style={{ fontSize: 10, opacity: 0.4 }}>🔗</span>}</div>}
             <span style={{ fontSize: 10, color: '#CDD1D9', transform: open ? 'rotate(180deg)' : '', transition: 'transform 0.2s' }}>▼</span>
           </div>
         </div>
@@ -632,7 +535,7 @@ function ItemRow({ item, onUpdate, onDelete }) {
             {item.details && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>{Object.entries(item.details).map(([k, v]) => (<div key={k} style={{ fontSize: 11, color: SUBTEXT, background: BG, padding: '4px 10px', borderRadius: 6, border: `1px solid ${BORDER}` }}><span style={{ color: MUTED, textTransform: 'capitalize' }}>{k.replace(/([A-Z])/g, ' $1').trim()}:</span> {v}</div>))}<button onClick={addDetail} style={{ fontSize: 11, color: ROYAL, background: 'transparent', border: `1px dashed ${BORDER}`, borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}>+ detail</button></div>}
             {item.contacts && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Contacts</div>{item.contacts.map((c, i) => (<div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 0' }}><div><span style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{c.name}</span><span style={{ fontSize: 12, color: MUTED, marginLeft: 6 }}>{c.role}</span></div><div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><a href={`tel:${c.phone}`} style={{ fontSize: 12, color: ROYAL, textDecoration: 'none', fontWeight: 500 }}>📞 {c.phone}</a><span onClick={() => removeContact(i)} style={{ fontSize: 12, color: '#CDD1D9', cursor: 'pointer' }}>×</span></div></div>))}{!addingContact && <button onClick={() => setAddingContact(true)} style={{ fontSize: 11, color: ROYAL, background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', fontWeight: 500 }}>+ Add contact</button>}{addingContact && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}><input placeholder="Name" value={newContact.name} onChange={(e) => setNewContact(p => ({ ...p, name: e.target.value }))} style={{ ...inputStyle, flex: '1 1 80px' }} /><input placeholder="Role" value={newContact.role} onChange={(e) => setNewContact(p => ({ ...p, role: e.target.value }))} style={{ ...inputStyle, flex: '1 1 60px' }} /><input placeholder="Phone" value={newContact.phone} onChange={(e) => setNewContact(p => ({ ...p, phone: e.target.value }))} style={{ ...inputStyle, flex: '1 1 80px' }} /><button onClick={addContact} style={{ fontSize: 11, padding: '6px 12px', borderRadius: 6, border: 'none', background: SAGE, color: 'white', cursor: 'pointer' }}>Add</button><button onClick={() => setAddingContact(false)} style={{ fontSize: 11, padding: '6px 8px', borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: MUTED }}>×</button></div>}</div>}
             {!item.contacts && <div style={{ marginBottom: 8 }}><button onClick={() => setAddingContact(true)} style={{ fontSize: 11, color: ROYAL, background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 0', fontWeight: 500 }}>+ Add contact</button>{addingContact && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}><input placeholder="Name" value={newContact.name} onChange={(e) => setNewContact(p => ({ ...p, name: e.target.value }))} style={{ ...inputStyle, flex: '1 1 80px' }} /><input placeholder="Role" value={newContact.role} onChange={(e) => setNewContact(p => ({ ...p, role: e.target.value }))} style={{ ...inputStyle, flex: '1 1 60px' }} /><input placeholder="Phone" value={newContact.phone} onChange={(e) => setNewContact(p => ({ ...p, phone: e.target.value }))} style={{ ...inputStyle, flex: '1 1 80px' }} /><button onClick={addContact} style={{ fontSize: 11, padding: '6px 12px', borderRadius: 6, border: 'none', background: SAGE, color: 'white', cursor: 'pointer' }}>Add</button><button onClick={() => setAddingContact(false)} style={{ fontSize: 11, padding: '6px 8px', borderRadius: 6, border: `1px solid ${BORDER}`, background: CARD, cursor: 'pointer', color: MUTED }}>×</button></div>}</div>}
-            {item.docs && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Documents</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{item.docs.map((d, i) => <span key={i} style={{ fontSize: 12, color: SUBTEXT, background: BG, padding: '5px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>📎 {d}<span onClick={() => removeDoc(i)} style={{ color: '#CDD1D9', cursor: 'pointer', fontSize: 10, marginLeft: 2 }}>×</span></span>)}</div></div>}
+            {item.folderUrl && <div style={{ marginBottom: 12 }}><a href={item.folderUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: ROYAL, background: '#EBF0FA', padding: '7px 12px', borderRadius: 8, textDecoration: 'none', fontWeight: 500, border: `1px solid ${ROYAL}20` }}>📁 Open files folder ↗</a></div>}
             {item.links && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>{item.links.map((l, i) => <span key={i} style={{ fontSize: 12, color: ROYAL, background: '#EBF0FA', padding: '5px 10px', borderRadius: 8, cursor: 'pointer', fontWeight: 500 }}>🔗 {l.label}</span>)}</div>}
             <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
               {item.action && <button style={{ fontSize: 12, padding: '7px 16px', borderRadius: 9, border: 'none', cursor: 'pointer', fontWeight: 500, background: TEXT, color: 'white', display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ fontSize: 11 }}>🤖</span> {item.action}</button>}
@@ -654,6 +557,7 @@ function ItemRow({ item, onUpdate, onDelete }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Rhythm</span><input value={draft.rhythm} onChange={(e) => setDraft(p => ({ ...p, rhythm: e.target.value }))} style={inputStyle} placeholder="e.g. Weekly, Annually" /></div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Next</span><input value={draft.next} onChange={(e) => setDraft(p => ({ ...p, next: e.target.value }))} style={inputStyle} placeholder="e.g. 15 Apr, Tue 15 Apr, Jul 2026" /></div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Action</span><input value={draft.action} onChange={(e) => setDraft(p => ({ ...p, action: e.target.value }))} style={inputStyle} placeholder="e.g. Book appointment" /></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Files 📁</span><input value={draft.folderUrl} onChange={(e) => setDraft(p => ({ ...p, folderUrl: e.target.value }))} style={inputStyle} placeholder="Paste Google Drive folder link" /></div>
             </div>
             <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Notes</div><textarea value={draft.notes} onChange={(e) => setDraft(p => ({ ...p, notes: e.target.value }))} rows={3} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, resize: 'vertical', outline: 'none', boxSizing: 'border-box', fontFamily: "'Outfit', sans-serif" }} /></div>
             {Object.keys(draft.details).length > 0 && <div style={{ marginBottom: 12 }}><div style={{ fontSize: 10, color: MUTED, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Details</div>{Object.entries(draft.details).map(([k, v]) => (<div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}><label style={{ fontSize: 12, color: SUBTEXT, width: 90, textTransform: 'capitalize', flexShrink: 0 }}>{k.replace(/([A-Z])/g, ' $1').trim()}</label><input value={v} onChange={(e) => setDraft(p => ({ ...p, details: { ...p.details, [k]: e.target.value } }))} style={inputStyle} /></div>))}</div>}
@@ -670,14 +574,20 @@ function ItemRow({ item, onUpdate, onDelete }) {
 // ===========================================
 function AddItemForm({ onAdd }) {
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState({ name: '', owner: 'Chloë', rhythm: '', next: '', status: 'handled', notes: '' });
+  const [draft, setDraft] = useState({ name: '', owner: 'Chloë', rhythm: '', next: '', status: 'handled', notes: '', folderUrl: '' });
   const inputStyle = { flex: 1, padding: '8px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, outline: 'none', fontFamily: "'Outfit', sans-serif" };
   const labelStyle = { fontSize: 11, color: MUTED, width: 60, flexShrink: 0, fontWeight: 500 };
 
   const submit = () => {
     if (!draft.name.trim()) return;
-    onAdd({ ...draft, name: draft.name.trim() });
-    setDraft({ name: '', owner: 'Chloë', rhythm: '', next: '', status: 'handled', notes: '' });
+    const payload = { ...draft, name: draft.name.trim() };
+    if (payload.folderUrl && payload.folderUrl.trim()) {
+      payload.folderUrl = payload.folderUrl.trim();
+    } else {
+      delete payload.folderUrl;
+    }
+    onAdd(payload);
+    setDraft({ name: '', owner: 'Chloë', rhythm: '', next: '', status: 'handled', notes: '', folderUrl: '' });
     setOpen(false);
   };
 
@@ -691,6 +601,7 @@ function AddItemForm({ onAdd }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Status</span><div style={{ display: 'flex', gap: 4 }}>{STATUS_OPTIONS.map(s => <Pill key={s} label={STATUS_CONFIG[s].label} active={draft.status === s} color={STATUS_CONFIG[s].color} onClick={() => setDraft(p => ({ ...p, status: s }))} />)}</div></div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Rhythm</span><input value={draft.rhythm} onChange={(e) => setDraft(p => ({ ...p, rhythm: e.target.value }))} style={inputStyle} placeholder="e.g. Annually, Weekly" /></div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Next</span><input value={draft.next} onChange={(e) => setDraft(p => ({ ...p, next: e.target.value }))} style={inputStyle} placeholder="e.g. 15 Apr, Tue 15 Apr, Jul 2026" /></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={labelStyle}>Files 📁</span><input value={draft.folderUrl} onChange={(e) => setDraft(p => ({ ...p, folderUrl: e.target.value }))} style={inputStyle} placeholder="Paste Google Drive folder link (optional)" /></div>
         <textarea value={draft.notes} onChange={(e) => setDraft(p => ({ ...p, notes: e.target.value }))} rows={2} placeholder="Notes (optional)" style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: `1px solid ${BORDER}`, fontSize: 13, color: TEXT, resize: 'vertical', outline: 'none', boxSizing: 'border-box', fontFamily: "'Outfit', sans-serif" }} />
       </div>
       <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
@@ -918,43 +829,15 @@ function ListsTab({ meals, setMeals, saveMeals, weekly, setWeekly, saveWeekly, m
   const [newItem, setNewItem] = useState('');
   const [newAisle, setNewAisle] = useState('other');
 
-  // Meals run Sun-Sat where Sunday is the day BEFORE the week's Monday.
-  // Data is stored with day names; we reorder to [Sunday, Mon..Sat] for display.
-  const WEEK_ORDER_SUN_FIRST = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const rawCurrentMeals = meals?.[mealWeek] || [];
-  const currentMeals = WEEK_ORDER_SUN_FIRST
-    .map(name => rawCurrentMeals.find(m => m.day === name))
-    .filter(Boolean);
-
-  // Compute date label per row. Sunday = Monday of this week minus 1 day.
-  const mealDateLabels = (() => {
-    const today = new Date();
-    const dow = today.getDay();
-    const daysToMonday = dow === 0 ? -6 : 1 - dow;
-    const weekOffset = mealWeek === 'nextWeek' ? 7 : 0;
-    const monday = new Date(today);
-    monday.setDate(today.getDate() + daysToMonday + weekOffset);
-    monday.setHours(0, 0, 0, 0);
-    const labels = {};
-    // Sunday first (day before Monday)
-    const sun = new Date(monday); sun.setDate(monday.getDate() - 1);
-    labels['Sunday'] = sun.getDate();
-    for (let i = 0; i < 6; i++) {
-      const d = new Date(monday); d.setDate(monday.getDate() + i);
-      labels[['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][i]] = d.getDate();
-    }
-    return labels;
-  })();
+  const currentMeals = meals?.[mealWeek] || [];
 
   const saveMealEdit = (i) => {
-    const dayName = currentMeals[i].day;
-    const updatedWeek = rawCurrentMeals.map(m => m.day === dayName ? { ...m, meal: mealDraft } : m);
+    const updatedWeek = currentMeals.map((m, j) => j === i ? { ...m, meal: mealDraft } : m);
     const updated = { ...meals, [mealWeek]: updatedWeek };
     setMeals(updated); saveMeals(updated); setEditingMeal(null);
   };
   const setCook = (i, who) => {
-    const dayName = currentMeals[i].day;
-    const updatedWeek = rawCurrentMeals.map(m => m.day === dayName ? { ...m, who } : m);
+    const updatedWeek = currentMeals.map((m, j) => j === i ? { ...m, who } : m);
     const updated = { ...meals, [mealWeek]: updatedWeek };
     setMeals(updated); saveMeals(updated); setEditingCook(null);
   };
@@ -986,7 +869,7 @@ function ListsTab({ meals, setMeals, saveMeals, weekly, setWeekly, saveWeekly, m
         <div style={{ background: CARD, borderRadius: 14, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
           {currentMeals.map((m, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: i < currentMeals.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
-              <span style={{ width: 56, fontSize: 11, fontWeight: 600, color: SUBTEXT, flexShrink: 0 }}>{m.day.slice(0, 3)} {mealDateLabels[m.day] || ''}</span>
+              <span style={{ width: 32, fontSize: 11, fontWeight: 600, color: SUBTEXT, flexShrink: 0 }}>{m.day.slice(0, 3)}</span>
               {editingMeal === i ? (
                 <div style={{ flex: 1, display: 'flex', gap: 6 }}>
                   <input value={mealDraft} onChange={(e) => setMealDraft(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveMealEdit(i)} style={{ flex: 1, padding: '5px 8px', borderRadius: 6, border: `1px solid ${BORDER}`, fontSize: 13, outline: 'none' }} autoFocus />
@@ -1048,6 +931,7 @@ export default function LifeOS({ session }) {
   const [exercise, setExercise] = useState(null);
   const [socialSched, setSocialSched] = useState(null);
   const [kidLogistics, setKidLogistics] = useState(null);
+  const [manualOpen, setManualOpen] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -1062,15 +946,8 @@ export default function LifeOS({ session }) {
         loadData('social_schedule', DEFAULT_SOCIAL_SCHED),
         loadData('kid_logistics', DEFAULT_KID_LOGISTICS),
       ]);
-
-      // Roll schedules forward if real-world Monday has advanced since last open
-      const rolled = await applyWeekRollover({
-        exercise: ex, socialSched: so, kidLogistics: kl, meals: m, custody: c,
-      });
-
-      setRegistry(r); setMeals(rolled.meals); setWeekly(w); setMonthly(mo); setToBuy(tb);
-      setCustody(rolled.custody); setExercise(rolled.exercise);
-      setSocialSched(rolled.socialSched); setKidLogistics(rolled.kidLogistics);
+      setRegistry(r); setMeals(m); setWeekly(w); setMonthly(mo); setToBuy(tb);
+      setCustody(c); setExercise(ex); setSocialSched(so); setKidLogistics(kl);
       setLoading(false);
     }
     load();
@@ -1195,8 +1072,12 @@ export default function LifeOS({ session }) {
               const nl = cat.items.filter((i) => i.status === 'needs-love').length;
               const hu = cat.items.filter((i) => i.status === 'heads-up').length;
               const allGood = nl === 0 && hu === 0;
-              const ta = cat.items.reduce((a, i) => a + (i.docs?.length || 0) + (i.contacts?.length || 0), 0);
-              return (<button key={key} onClick={() => setSelectedCat(key)} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: '18px 16px', textAlign: 'left', cursor: 'pointer' }}><div style={{ fontSize: 24, marginBottom: 6 }}>{cat.emoji}</div><div style={{ fontSize: 14, fontWeight: 600, color: TEXT }}>{cat.label}</div><div style={{ fontSize: 12, color: MUTED, marginTop: 2 }}>{cat.items.length} items{ta > 0 && ` · ${ta} 📎`}</div><div style={{ fontSize: 11, marginTop: 4 }}>{allGood ? <span style={{ color: SAGE }}>All good ✓</span> : nl > 0 ? <span style={{ color: CORAL }}>💛 {nl}</span> : <span style={{ color: PURPLE }}>👀 {hu}</span>}</div></button>);
+              const fu = cat.items.filter((i) => i.folderUrl).length;
+              const cn = cat.items.reduce((a, i) => a + (i.contacts?.length || 0), 0);
+              const extras = [];
+              if (fu > 0) extras.push(`${fu} 🔗`);
+              if (cn > 0) extras.push(`${cn} 📞`);
+              return (<button key={key} onClick={() => setSelectedCat(key)} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: '18px 16px', textAlign: 'left', cursor: 'pointer' }}><div style={{ fontSize: 24, marginBottom: 6 }}>{cat.emoji}</div><div style={{ fontSize: 14, fontWeight: 600, color: TEXT }}>{cat.label}</div><div style={{ fontSize: 12, color: MUTED, marginTop: 2 }}>{cat.items.length} items{extras.length > 0 && ` · ${extras.join(' · ')}`}</div><div style={{ fontSize: 11, marginTop: 4 }}>{allGood ? <span style={{ color: SAGE }}>All good ✓</span> : nl > 0 ? <span style={{ color: CORAL }}>💛 {nl}</span> : <span style={{ color: PURPLE }}>👀 {hu}</span>}</div></button>);
             })}
           </div>
         </>)}
@@ -1217,7 +1098,120 @@ export default function LifeOS({ session }) {
         {/* ========= MANUAL TAB ========= */}
         {view === 'manual' && (<>
           <div style={{ padding: 22, background: `linear-gradient(135deg, ${TEXT}, #2E3548)`, borderRadius: 20, marginBottom: 16, color: 'white' }}><h3 style={{ fontSize: 20, fontFamily: "'Fraunces', serif", fontWeight: 600, margin: '0 0 6px' }}>The Manual</h3><p style={{ fontSize: 13, margin: 0, opacity: 0.8, lineHeight: 1.5 }}>Everything someone would need to keep your life running.</p></div>
-          {[{ emoji: '📞', title: 'Key contacts', desc: `${allItems.reduce((a, i) => a + (i.contacts?.length || 0), 0)} contacts stored` }, { emoji: '📎', title: 'Documents & files', desc: `${allItems.reduce((a, i) => a + (i.docs?.length || 0), 0)} documents stored` }, { emoji: '🔄', title: 'What recurs and who owns it', desc: `${allItems.length} items across ${Object.keys(registry).length} categories` }, { emoji: '👦', title: "Kids' routines + sizes", desc: 'School, pick-ups, lessons, medical, clothing' }, { emoji: '💳', title: 'Financial overview', desc: 'Accounts, insurance, investments, tax' }, { emoji: '🔐', title: 'Account access', desc: 'Password manager, shared accounts' }].map((s, i) => (<div key={i} style={{ padding: '14px 16px', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14 }}><span style={{ fontSize: 22 }}>{s.emoji}</span><div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 600 }}>{s.title}</div><div style={{ fontSize: 12, color: MUTED, marginTop: 1 }}>{s.desc}</div></div><span style={{ color: '#CDD1D9', fontSize: 14 }}>→</span></div>))}
+          {(() => {
+            const contactCount = allItems.reduce((a, i) => a + (i.contacts?.length || 0), 0);
+            const folderCount = allItems.filter((i) => i.folderUrl).length;
+            const sections = [
+              { id: 'contacts', emoji: '📞', title: 'Key contacts', desc: `${contactCount} contact${contactCount === 1 ? '' : 's'} stored` },
+              { id: 'files', emoji: '📁', title: 'Files & folders', desc: `${folderCount} folder link${folderCount === 1 ? '' : 's'} stored` },
+              { id: 'recurs', emoji: '🔄', title: 'What recurs and who owns it', desc: `${allItems.length} items across ${Object.keys(registry).length} categories` },
+              { id: 'kids', emoji: '👦', title: "Kids' routines + sizes", desc: 'School, pick-ups, lessons, medical, clothing' },
+              { id: 'finance', emoji: '💳', title: 'Financial overview', desc: 'Accounts, insurance, investments, tax' },
+              { id: 'access', emoji: '🔐', title: 'Account access', desc: 'Password manager, shared accounts' },
+            ];
+            return sections.map((s) => {
+              const isOpen = manualOpen === s.id;
+              return (
+                <div key={s.id} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, marginBottom: 8, overflow: 'hidden' }}>
+                  <div onClick={() => setManualOpen(isOpen ? null : s.id)} style={{ padding: '14px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <span style={{ fontSize: 22 }}>{s.emoji}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>{s.title}</div>
+                      <div style={{ fontSize: 12, color: MUTED, marginTop: 1 }}>{s.desc}</div>
+                    </div>
+                    <span style={{ color: '#CDD1D9', fontSize: 12, transform: isOpen ? 'rotate(180deg)' : '', transition: 'transform 0.2s' }}>▼</span>
+                  </div>
+                  {isOpen && (
+                    <div style={{ padding: '0 16px 16px', borderTop: `1px solid ${BORDER}`, paddingTop: 14 }}>
+                      {s.id === 'contacts' && (() => {
+                        const rows = [];
+                        Object.entries(registry).forEach(([ck, cat]) => {
+                          cat.items.forEach((it) => {
+                            (it.contacts || []).forEach((c, idx) => rows.push({ ...c, itemName: it.name, catLabel: cat.label, catEmoji: cat.emoji, key: `${ck}-${it._id}-${idx}` }));
+                          });
+                        });
+                        if (rows.length === 0) return <div style={{ fontSize: 13, color: MUTED }}>No contacts saved yet.</div>;
+                        return rows.map((c) => (
+                          <div key={c.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${BORDER}` }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{c.name}<span style={{ fontSize: 11, color: MUTED, marginLeft: 6, fontWeight: 400 }}>{c.role}</span></div>
+                              <div style={{ fontSize: 11, color: MUTED, marginTop: 1 }}>{c.catEmoji} {c.catLabel} · {c.itemName}</div>
+                            </div>
+                            <a href={`tel:${c.phone}`} style={{ fontSize: 12, color: ROYAL, textDecoration: 'none', fontWeight: 500, flexShrink: 0, marginLeft: 8 }}>📞 {c.phone}</a>
+                          </div>
+                        ));
+                      })()}
+                      {s.id === 'files' && (() => {
+                        const rows = [];
+                        Object.entries(registry).forEach(([ck, cat]) => {
+                          cat.items.forEach((it) => { if (it.folderUrl) rows.push({ url: it.folderUrl, itemName: it.name, catLabel: cat.label, catEmoji: cat.emoji, key: `${ck}-${it._id}` }); });
+                        });
+                        if (rows.length === 0) return <div style={{ fontSize: 13, color: MUTED, lineHeight: 1.5 }}>No folder links saved yet. Open any registry item, tap ✏️ Edit, and paste a Google Drive folder URL in the Files 📁 field.</div>;
+                        return rows.map((r) => (
+                          <div key={r.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${BORDER}`, gap: 8 }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{r.itemName}</div>
+                              <div style={{ fontSize: 11, color: MUTED, marginTop: 1 }}>{r.catEmoji} {r.catLabel}</div>
+                            </div>
+                            <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: ROYAL, textDecoration: 'none', fontWeight: 500, flexShrink: 0, background: '#EBF0FA', padding: '6px 10px', borderRadius: 8 }}>📁 Open ↗</a>
+                          </div>
+                        ));
+                      })()}
+                      {s.id === 'recurs' && (() => {
+                        const byOwner = {};
+                        allItems.forEach((it) => { const o = it.owner || '—'; if (!byOwner[o]) byOwner[o] = []; byOwner[o].push(it); });
+                        const ownerOrder = ['Chloë', 'Cameron', 'Both', '—'];
+                        const ownerColor = { 'Chloë': ROYAL, 'Cameron': TEAL, 'Both': PURPLE, '—': MUTED };
+                        return ownerOrder.filter((o) => byOwner[o]).map((o) => (
+                          <div key={o} style={{ marginBottom: 12 }}>
+                            <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: ownerColor[o], marginBottom: 6 }}>{o} · {byOwner[o].length}</div>
+                            {byOwner[o].map((it) => (
+                              <div key={it._id} style={{ fontSize: 13, color: SUBTEXT, padding: '4px 0', display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                                <span style={{ color: TEXT }}>{it.name}</span>
+                                <span style={{ fontSize: 11, color: MUTED, flexShrink: 0 }}>{it.rhythm}{it.next ? ` · ${it.next}` : ''}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ));
+                      })()}
+                      {s.id === 'kids' && (() => {
+                        const kidsItems = registry.kids?.items || [];
+                        if (kidsItems.length === 0) return <div style={{ fontSize: 13, color: MUTED }}>No items in the Kids category yet.</div>;
+                        return kidsItems.map((it) => (
+                          <div key={it._id} style={{ padding: '10px 0', borderBottom: `1px solid ${BORDER}` }}>
+                            <div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{it.name}</div>
+                            <div style={{ fontSize: 11, color: MUTED, marginTop: 1 }}>{it.owner} · {it.rhythm}{it.next ? ` · ${it.next}` : ''}</div>
+                            {it.notes && <div style={{ fontSize: 12, color: SUBTEXT, marginTop: 4, lineHeight: 1.4 }}>{it.notes}</div>}
+                            {it.details && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>{Object.entries(it.details).map(([k, v]) => (<div key={k} style={{ fontSize: 11, color: SUBTEXT, background: BG, padding: '3px 8px', borderRadius: 6 }}><span style={{ color: MUTED, textTransform: 'capitalize' }}>{k.replace(/([A-Z])/g, ' $1').trim()}:</span> {v}</div>))}</div>}
+                          </div>
+                        ));
+                      })()}
+                      {s.id === 'finance' && (() => {
+                        const financeItems = [...(registry.finance?.items || []), ...(registry.rentals?.items || [])];
+                        if (financeItems.length === 0) return <div style={{ fontSize: 13, color: MUTED }}>No items in Finance or Rentals yet.</div>;
+                        return financeItems.map((it) => (
+                          <div key={it._id} style={{ padding: '8px 0', borderBottom: `1px solid ${BORDER}` }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                              <span style={{ fontSize: 13, color: TEXT, fontWeight: 500 }}>{it.name}</span>
+                              <span style={{ fontSize: 11, color: MUTED, flexShrink: 0 }}>{it.owner}</span>
+                            </div>
+                            <div style={{ fontSize: 11, color: MUTED, marginTop: 1 }}>{it.rhythm}{it.next ? ` · ${it.next}` : ''}</div>
+                            {it.notes && <div style={{ fontSize: 12, color: SUBTEXT, marginTop: 3, lineHeight: 1.4 }}>{it.notes}</div>}
+                          </div>
+                        ));
+                      })()}
+                      {s.id === 'access' && (
+                        <div style={{ fontSize: 13, color: SUBTEXT, lineHeight: 1.55 }}>
+                          Account access lives outside the app for security. Keep the master list in a shared password manager (1Password, Bitwarden, or iCloud Keychain).
+                          <div style={{ marginTop: 8, fontSize: 12, color: MUTED }}>For specific accounts tied to a registry item (e.g. tenant portal, insurance), paste the Google Drive folder link in the item's Files 📁 field, and keep credentials in a secure note inside that folder.</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            });
+          })()}
         </>)}
       </div>
     </div>
