@@ -146,7 +146,7 @@ const DEFAULT_TOBUY = [{ id: 40, text: 'Tom cricket whites (13-14)', checked: fa
 //   "Paid ✓", "—", "Last updated 2023"   → returns null
 const MONTH_LOOKUP = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
 
-function parseNextDate(nextStr, today = new Date()) {
+function parseNextDate(nextStr, today = new Date(), opts = {}) {
   if (!nextStr || typeof nextStr !== 'string') return null;
   const s = nextStr.trim();
   if (!s) return null;
@@ -163,7 +163,11 @@ function parseNextDate(nextStr, today = new Date()) {
   // "Apr 2027" or "Jul 2026" — month + year (no day) — 4-digit year separates it from month-day
   const mMonthYear = s.match(new RegExp(`\\b${monthRe}\\s+(\\d{4})\\b`, 'i'));
 
-  // Prefer day-first or month-first if day is a valid day-of-month (1–31, not a 4-digit year)
+  // Roll-forward rule:
+  //   - For annual items: the moment the date is past, jump to next year's occurrence
+  //   - For non-annual items with no year stated: 7-day grace window before rolling (gives one-off dates a moment of "overdue")
+  const rollThresholdDays = opts.annual ? 0 : -7;
+
   const tryDayMonth = (dayStr, monStr, yearStr) => {
     const day = parseInt(dayStr, 10);
     if (isNaN(day) || day < 1 || day > 31) return null;
@@ -172,12 +176,22 @@ function parseNextDate(nextStr, today = new Date()) {
     let year;
     if (yearStr) {
       year = parseInt(yearStr, 10);
+      // Annual items with an explicit year that's already past this year: still roll forward
+      if (opts.annual) {
+        const candidate = new Date(year, month, day);
+        const daysDiff = (candidate - today) / (1000 * 60 * 60 * 24);
+        if (daysDiff < rollThresholdDays) {
+          // Jump forward by whole years until we're past the threshold
+          while (((new Date(year, month, day)) - today) / (1000 * 60 * 60 * 24) < rollThresholdDays) {
+            year += 1;
+          }
+        }
+      }
     } else {
-      // No year: assume this year. If the date is already >7 days past, roll to next year.
       year = today.getFullYear();
       const candidate = new Date(year, month, day);
       const daysDiff = (candidate - today) / (1000 * 60 * 60 * 24);
-      if (daysDiff < -7) year += 1;
+      if (daysDiff < rollThresholdDays) year += 1;
     }
     return new Date(year, month, day);
   };
@@ -187,7 +201,6 @@ function parseNextDate(nextStr, today = new Date()) {
     if (d) return d;
   }
   if (mMonthFirst) {
-    // Only accept month-first if the "day" isn't a 4-digit year (which would have been matched by mMonthYear instead)
     const dayStr = mMonthFirst[2];
     if (dayStr.length <= 2) {
       const d = tryDayMonth(dayStr, mMonthFirst[1], mMonthFirst[3]);
@@ -198,26 +211,57 @@ function parseNextDate(nextStr, today = new Date()) {
     const month = MONTH_LOOKUP[mMonthYear[1].toLowerCase()];
     const year = parseInt(mMonthYear[2], 10);
     if (month !== undefined && !isNaN(year)) {
-      // Treat month+year as END of month (last day) — "do it by end of April"
-      return new Date(year, month + 1, 0);
+      // Treat month+year as END of month
+      let y = year;
+      if (opts.annual) {
+        while ((new Date(y, month + 1, 0) - today) / (1000 * 60 * 60 * 24) < rollThresholdDays) {
+          y += 1;
+        }
+      }
+      return new Date(y, month + 1, 0);
     }
   }
 
   return null;
 }
 
+// Detect whether an item recurs annually. True for:
+//   - rhythm mentions "annual", "annually", "yearly", "every year"
+//   - name contains "birthday" or "anniversary" (covers items not tagged with rhythm)
+function isAnnualItem(item) {
+  const rhythm = (item.rhythm || '').toLowerCase();
+  if (/\b(annual|annually|yearly|every year)\b/.test(rhythm)) return true;
+  const name = (item.name || '').toLowerCase();
+  if (name.includes('birthday') || name.includes('anniversary')) return true;
+  return false;
+}
+
 // Compute effective status for an item:
-//   - If item.next parses to a real date: auto-calculate based on days-until (overrides manual status)
+//   1. If manualStatusOverride is set (and still valid), return it
+//   2. If item.next parses to a real date: auto-calculate based on days-until
 //       overdue (past)        → 'needs-love'
 //       within 30 days        → 'heads-up'
 //       else                  → 'handled'
-//   - If not parseable (e.g. "Paid ✓", "—"): return manual item.status
+//   3. Otherwise: return manual item.status
+//
+// Manual override validity:
+//   - override stores (status, setAt). It stays valid until item.next changes.
+//   - Since we don't trigger a background job, override auto-expires when it no longer reflects the intent.
+//     Specifically: if the date is now >60 days out from when the override was set, we assume
+//     the user has moved on and the override should clear. But the primary mechanism for clearing is
+//     editing the 'next' field (handled in saveEdit in ItemRow).
 function computeStatus(item, today = new Date()) {
-  const parsed = parseNextDate(item.next, today);
+  // Manual override wins (cleared when `next` is edited — handled in saveEdit)
+  if (item.manualStatusOverride) {
+    return item.manualStatusOverride;
+  }
+
+  const annual = isAnnualItem(item);
+  const parsed = parseNextDate(item.next, today, { annual });
   if (!parsed) return item.status || 'handled';
   const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const daysDiff = (parsed - startOfToday) / (1000 * 60 * 60 * 24);
-  if (daysDiff < 0) return 'needs-love';      // overdue
+  if (daysDiff < 0) return 'needs-love';      // overdue (only possible for non-annual now)
   if (daysDiff <= 30) return 'heads-up';      // within 30 days
   return 'handled';
 }
@@ -639,10 +683,25 @@ function ItemRow({ item, effectiveStatus, initialOpen, onUpdate, onDelete }) {
     } else {
       delete updated.folderUrl;
     }
+    // Clear manual status override if `next` changed — new date = new auto-status
+    if ((draft.next || '') !== (item.next || '') && updated.manualStatusOverride) {
+      delete updated.manualStatusOverride;
+    }
     setEditing(false); if (onUpdate) onUpdate(updated);
   };
 
-  const setStatus = (s) => { const updated = { ...item, status: s }; if (onUpdate) onUpdate(updated); };
+  // setStatus writes a manual override that wins over auto-computed status
+  const setStatus = (s) => {
+    const updated = { ...item, status: s, manualStatusOverride: s };
+    if (onUpdate) onUpdate(updated);
+  };
+
+  // clearStatus removes the manual override, returning to auto-computed behaviour
+  const clearStatus = () => {
+    const updated = { ...item };
+    delete updated.manualStatusOverride;
+    if (onUpdate) onUpdate(updated);
+  };
 
   const removeContact = (idx) => {
     const updated = { ...item, contacts: item.contacts.filter((_, i) => i !== idx) };
@@ -688,20 +747,22 @@ function ItemRow({ item, effectiveStatus, initialOpen, onUpdate, onDelete }) {
       </div>
       {open && (
         <div style={{ padding: '0 16px 16px', borderTop: `1px solid ${BORDER}`, paddingTop: 14 }}>
-          {/* Status buttons */}
+          {/* Status buttons — always tappable. Caption indicates auto vs manual override. */}
           {(() => {
-            const isAuto = parseNextDate(item.next) !== null;
-            if (isAuto) {
-              return (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-                  {STATUS_OPTIONS.map((s) => (<span key={s} style={{ fontSize: 10, padding: '4px 10px', borderRadius: 20, border: displayStatus === s ? 'none' : `1px solid ${BORDER}`, background: displayStatus === s ? STATUS_CONFIG[s].bg : 'transparent', color: STATUS_CONFIG[s].color, fontWeight: 500, opacity: displayStatus === s ? 1 : 0.5 }}>{STATUS_CONFIG[s].emoji} {STATUS_CONFIG[s].label}</span>))}
-                  <span style={{ fontSize: 10, color: MUTED, fontStyle: 'italic' }}>auto from date</span>
-                </div>
-              );
-            }
+            const isDateDriven = parseNextDate(item.next, new Date(), { annual: isAnnualItem(item) }) !== null;
+            const hasOverride = !!item.manualStatusOverride;
             return (
-              <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
-                {STATUS_OPTIONS.map((s) => (<button key={s} onClick={(e) => { e.stopPropagation(); setStatus(s); }} style={{ fontSize: 10, padding: '4px 10px', borderRadius: 20, border: item.status === s ? 'none' : `1px solid ${BORDER}`, background: item.status === s ? STATUS_CONFIG[s].bg : 'transparent', color: STATUS_CONFIG[s].color, cursor: 'pointer', fontWeight: 500 }}>{STATUS_CONFIG[s].emoji} {STATUS_CONFIG[s].label}</button>))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+                {STATUS_OPTIONS.map((s) => (<button key={s} onClick={(e) => { e.stopPropagation(); setStatus(s); }} style={{ fontSize: 10, padding: '4px 10px', borderRadius: 20, border: displayStatus === s ? 'none' : `1px solid ${BORDER}`, background: displayStatus === s ? STATUS_CONFIG[s].bg : 'transparent', color: STATUS_CONFIG[s].color, cursor: 'pointer', fontWeight: 500 }}>{STATUS_CONFIG[s].emoji} {STATUS_CONFIG[s].label}</button>))}
+                {isDateDriven && hasOverride && (
+                  <span style={{ fontSize: 10, color: MUTED, fontStyle: 'italic', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    manual
+                    <button onClick={(e) => { e.stopPropagation(); clearStatus(); }} style={{ fontSize: 10, color: ROYAL, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline', fontStyle: 'normal' }}>reset to auto</button>
+                  </span>
+                )}
+                {isDateDriven && !hasOverride && (
+                  <span style={{ fontSize: 10, color: MUTED, fontStyle: 'italic' }}>auto from date</span>
+                )}
               </div>
             );
           })()}
