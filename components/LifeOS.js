@@ -131,6 +131,97 @@ const DEFAULT_WEEKLY = {
 const DEFAULT_MONTHLY = [{ id: 30, text: 'Washing powder', checked: false }, { id: 31, text: 'Olive oil', checked: false }, { id: 32, text: 'Cling wrap', checked: false }];
 const DEFAULT_TOBUY = [{ id: 40, text: 'Tom cricket whites (13-14)', checked: false }, { id: 41, text: 'Luke school shoes (UK 5)', checked: false }, { id: 42, text: "Cameron's mom gift", checked: false }, { id: 43, text: 'Dyson filters x2', checked: false }];
 
+// ===========================================
+// DATE PARSING + AUTO-STATUS
+// ===========================================
+// Parse item.next into a JS Date (or null if not parseable). Handles formats:
+//   "15 Apr", "Apr 15"             → current year, rolling forward if already past
+//   "Tue 15 Apr"                   → day prefix ignored for parsing
+//   "15 Apr 2027", "Apr 15 2027"   → explicit year
+//   "Apr 2027", "Jul 2026"         → month + year, treated as END of month
+//   "Due Jul 2026"                 → month + year, treated as END of month
+//   "Was due Mar 2026"             → month + year, treated as END of month (likely past)
+//   "Expires Dec 2026"             → month + year, treated as END of month
+// Rejects:
+//   "Paid ✓", "—", "Last updated 2023"   → returns null
+const MONTH_LOOKUP = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+
+function parseNextDate(nextStr, today = new Date()) {
+  if (!nextStr || typeof nextStr !== 'string') return null;
+  const s = nextStr.trim();
+  if (!s) return null;
+
+  // Hard rejections: statuses, not dates
+  if (/^(Paid|—|-|Last updated)\b/i.test(s)) return null;
+
+  const monthRe = '(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)';
+
+  // "15 Apr 2027" or "15 Apr" — day + month (+ optional year)
+  const mDayFirst = s.match(new RegExp(`\\b(\\d{1,2})\\s+${monthRe}(?:\\s+(\\d{4}))?\\b`, 'i'));
+  // "Apr 15 2027" or "Apr 15" — month + day (+ optional year) — ensure day is 1–31
+  const mMonthFirst = s.match(new RegExp(`\\b${monthRe}\\s+(\\d{1,2})(?!\\d)(?:\\s+(\\d{4}))?\\b`, 'i'));
+  // "Apr 2027" or "Jul 2026" — month + year (no day) — 4-digit year separates it from month-day
+  const mMonthYear = s.match(new RegExp(`\\b${monthRe}\\s+(\\d{4})\\b`, 'i'));
+
+  // Prefer day-first or month-first if day is a valid day-of-month (1–31, not a 4-digit year)
+  const tryDayMonth = (dayStr, monStr, yearStr) => {
+    const day = parseInt(dayStr, 10);
+    if (isNaN(day) || day < 1 || day > 31) return null;
+    const month = MONTH_LOOKUP[monStr.toLowerCase()];
+    if (month === undefined) return null;
+    let year;
+    if (yearStr) {
+      year = parseInt(yearStr, 10);
+    } else {
+      // No year: assume this year. If the date is already >7 days past, roll to next year.
+      year = today.getFullYear();
+      const candidate = new Date(year, month, day);
+      const daysDiff = (candidate - today) / (1000 * 60 * 60 * 24);
+      if (daysDiff < -7) year += 1;
+    }
+    return new Date(year, month, day);
+  };
+
+  if (mDayFirst) {
+    const d = tryDayMonth(mDayFirst[1], mDayFirst[2], mDayFirst[3]);
+    if (d) return d;
+  }
+  if (mMonthFirst) {
+    // Only accept month-first if the "day" isn't a 4-digit year (which would have been matched by mMonthYear instead)
+    const dayStr = mMonthFirst[2];
+    if (dayStr.length <= 2) {
+      const d = tryDayMonth(dayStr, mMonthFirst[1], mMonthFirst[3]);
+      if (d) return d;
+    }
+  }
+  if (mMonthYear) {
+    const month = MONTH_LOOKUP[mMonthYear[1].toLowerCase()];
+    const year = parseInt(mMonthYear[2], 10);
+    if (month !== undefined && !isNaN(year)) {
+      // Treat month+year as END of month (last day) — "do it by end of April"
+      return new Date(year, month + 1, 0);
+    }
+  }
+
+  return null;
+}
+
+// Compute effective status for an item:
+//   - If item.next parses to a real date: auto-calculate based on days-until (overrides manual status)
+//       overdue (past)        → 'needs-love'
+//       within 30 days        → 'heads-up'
+//       else                  → 'handled'
+//   - If not parseable (e.g. "Paid ✓", "—"): return manual item.status
+function computeStatus(item, today = new Date()) {
+  const parsed = parseNextDate(item.next, today);
+  if (!parsed) return item.status || 'handled';
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const daysDiff = (parsed - startOfToday) / (1000 * 60 * 60 * 24);
+  if (daysDiff < 0) return 'needs-love';      // overdue
+  if (daysDiff <= 30) return 'heads-up';      // within 30 days
+  return 'handled';
+}
+
 // Dynamic week view builder - aggregates data from all sources
 function buildWeekView(weekKey, { meals, exercise, socialSched, kidLogistics, custody, registry }) {
   const today = new Date();
@@ -215,15 +306,72 @@ function buildWeekView(weekKey, { meals, exercise, socialSched, kidLogistics, cu
       if (kl.notes?.trim()) tags.push({ text: kl.notes, color: COLORS.kids });
     }
 
-    // 6. Registry items matching this day (by date substring)
+    // 6. Registry items matching this day
+    // Three-tier matcher (Phase 2.1):
+    //   (a) Rhythm-first: if rhythm contains day-of-week tokens, those drive recurrence
+    //   (b) Birthdays/anniversaries in People & Social: match on month+date annually
+    //   (c) One-off date in `next`: must be a real day+month, NOT a vague "Apr 2026" / "Jul 2026" / "Paid ✓" / "Was due Mar 2026"
     if (registry) {
-      const patterns = [`${dayShort} ${date}`, `${date} ${month}`, `${month} ${date}`];
-      Object.values(registry).forEach(cat => {
+      const dayTokenRegex = /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/g;
+      // Valid one-off date anchors for this day: e.g. "15 Apr", "Apr 15", "Tue 15 Apr"
+      // NOT matched: "Apr 2026", "Jul 2026", "Expires 2028", "Paid ✓", "Was due Mar 2026"
+      const dayDatePatterns = [
+        new RegExp(`(^|[^0-9])${date}\\s+${month}\\b(?!\\s*\\d{4})`, 'i'),  // "15 Apr" but not "15 Apr 2026"? Actually allow, see below
+        new RegExp(`\\b${month}\\s+${date}(?!\\d)(?!\\s*\\d{4})`, 'i'),     // "Apr 15"
+      ];
+      // Day-prefix rule: if item.next starts with a day-of-week prefix, it MUST match today's day-of-week
+      Object.entries(registry).forEach(([catKey, cat]) => {
         cat.items.forEach(item => {
-          if (!item.next) return;
-          if (patterns.some(p => item.next.includes(p))) {
-            tags.push({ text: item.name, color: COLORS.home });
+          let matched = false;
+
+          // (a) Rhythm-first
+          if (item.rhythm) {
+            const rhythmDays = item.rhythm.match(dayTokenRegex);
+            if (rhythmDays && rhythmDays.length > 0) {
+              if (rhythmDays.includes(dayShort)) {
+                tags.push({ text: item.name, color: COLORS.home });
+              }
+              return; // rhythm has day tokens: `next` is ignored for day matching
+            }
           }
+
+          // (b) Birthdays/anniversaries — annual month+date match
+          if (catKey === 'social' || catKey === 'people') {
+            const nameL = (item.name || '').toLowerCase();
+            if ((nameL.includes('birthday') || nameL.includes('anniversary')) && item.next) {
+              // Match "Apr 28", "28 Apr", "Apr 28 2026", "28 Apr 2026"
+              const hasDateDay = new RegExp(`\\b${month}\\s+${date}\\b|\\b${date}\\s+${month}\\b`, 'i').test(item.next);
+              if (hasDateDay) {
+                tags.push({ text: `🎂 ${item.name}`, color: COLORS.kids });
+                matched = true;
+              }
+              return;
+            }
+          }
+
+          // (c) One-off date in `next`
+          if (!item.next || matched) return;
+          const nextStr = item.next.trim();
+
+          // Reject: year-only strings like "Apr 2026", "Jul 2026", "Expires 2028", "Warranty 2028", "Was due Mar 2026"
+          // Heuristic: if the string has a 4-digit year AND no standalone day-of-month (1–31) adjacent to the month, reject
+          // Also reject obvious non-date statuses: "Paid ✓", "—", "Last updated 2023"
+          if (/^(Paid|—|Last updated|Expires)\b/i.test(nextStr)) return;
+
+          // Check for a real day+month pattern matching today
+          // Pattern 1: day number adjacent to month name (e.g. "15 Apr", "Apr 15", "Tue 15 Apr")
+          // We do NOT match "Apr 2026" because 2026 is not a day-of-month (and date will never be 2026)
+          const dayMonthRegex = new RegExp(`(^|[^0-9a-zA-Z])${date}\\s+${month}\\b`, 'i');
+          const monthDayRegex = new RegExp(`\\b${month}\\s+${date}(?!\\d)`, 'i');
+          const isDateMatch = dayMonthRegex.test(nextStr) || monthDayRegex.test(nextStr);
+
+          if (!isDateMatch) return;
+
+          // Day-prefix check: if next starts with a different day-of-week, reject (e.g. "Mon 14 Apr" on Tuesday)
+          const prefixMatch = nextStr.match(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/);
+          if (prefixMatch && prefixMatch[1] !== dayShort) return;
+
+          tags.push({ text: item.name, color: COLORS.home });
         });
       });
     }
@@ -439,13 +587,28 @@ function DateFormatTip() {
 // ===========================================
 // REGISTRY ITEM ROW (Full Editability)
 // ===========================================
-function ItemRow({ item, onUpdate, onDelete }) {
-  const [open, setOpen] = useState(false);
+function ItemRow({ item, effectiveStatus, initialOpen, onUpdate, onDelete }) {
+  const [open, setOpen] = useState(!!initialOpen);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState({});
   const [showDelete, setShowDelete] = useState(false);
   const [addingContact, setAddingContact] = useState(false);
   const [newContact, setNewContact] = useState({ name: '', role: '', phone: '' });
+
+  // Auto-open + scroll into view if this row was deep-linked from the Today tab
+  useEffect(() => {
+    if (initialOpen) {
+      setOpen(true);
+      // defer scroll to next tick so the row has rendered in its open state
+      setTimeout(() => {
+        const el = document.getElementById(`item-${item._id}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+    }
+  }, [initialOpen, item._id]);
+
+  // Display status: prefer auto-calculated effectiveStatus, fall back to manual
+  const displayStatus = effectiveStatus || item.status;
 
   // Reset transient UI state when the underlying item identity changes
   // (prevents showDelete leaking from a deleted item to a different one)
@@ -510,11 +673,11 @@ function ItemRow({ item, onUpdate, onDelete }) {
   const labelStyle = { fontSize: 11, color: MUTED, width: 60, flexShrink: 0, fontWeight: 500 };
 
   return (
-    <div style={{ background: CARD, borderRadius: 14, marginBottom: 8, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
+    <div id={`item-${item._id}`} style={{ background: CARD, borderRadius: 14, marginBottom: 8, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
       <div onClick={() => setOpen(!open)} style={{ padding: '13px 16px', cursor: 'pointer' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}><span style={{ fontSize: 14, color: TEXT, fontWeight: 500 }}>{item.name}</span><StatusBadge status={item.status} /></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}><span style={{ fontSize: 14, color: TEXT, fontWeight: 500 }}>{item.name}</span><StatusBadge status={displayStatus} /></div>
             <div style={{ fontSize: 12, color: MUTED, marginTop: 3 }}>{item.owner} · {item.rhythm} · {item.next}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -526,9 +689,22 @@ function ItemRow({ item, onUpdate, onDelete }) {
       {open && (
         <div style={{ padding: '0 16px 16px', borderTop: `1px solid ${BORDER}`, paddingTop: 14 }}>
           {/* Status buttons */}
-          <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
-            {STATUS_OPTIONS.map((s) => (<button key={s} onClick={(e) => { e.stopPropagation(); setStatus(s); }} style={{ fontSize: 10, padding: '4px 10px', borderRadius: 20, border: item.status === s ? 'none' : `1px solid ${BORDER}`, background: item.status === s ? STATUS_CONFIG[s].bg : 'transparent', color: STATUS_CONFIG[s].color, cursor: 'pointer', fontWeight: 500 }}>{STATUS_CONFIG[s].emoji} {STATUS_CONFIG[s].label}</button>))}
-          </div>
+          {(() => {
+            const isAuto = parseNextDate(item.next) !== null;
+            if (isAuto) {
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+                  {STATUS_OPTIONS.map((s) => (<span key={s} style={{ fontSize: 10, padding: '4px 10px', borderRadius: 20, border: displayStatus === s ? 'none' : `1px solid ${BORDER}`, background: displayStatus === s ? STATUS_CONFIG[s].bg : 'transparent', color: STATUS_CONFIG[s].color, fontWeight: 500, opacity: displayStatus === s ? 1 : 0.5 }}>{STATUS_CONFIG[s].emoji} {STATUS_CONFIG[s].label}</span>))}
+                  <span style={{ fontSize: 10, color: MUTED, fontStyle: 'italic' }}>auto from date</span>
+                </div>
+              );
+            }
+            return (
+              <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
+                {STATUS_OPTIONS.map((s) => (<button key={s} onClick={(e) => { e.stopPropagation(); setStatus(s); }} style={{ fontSize: 10, padding: '4px 10px', borderRadius: 20, border: item.status === s ? 'none' : `1px solid ${BORDER}`, background: item.status === s ? STATUS_CONFIG[s].bg : 'transparent', color: STATUS_CONFIG[s].color, cursor: 'pointer', fontWeight: 500 }}>{STATUS_CONFIG[s].emoji} {STATUS_CONFIG[s].label}</button>))}
+              </div>
+            );
+          })()}
 
           {!editing ? (<>
             {item.notes && <p style={{ fontSize: 13, color: SUBTEXT, lineHeight: 1.5, margin: '0 0 12px' }}>{item.notes}</p>}
@@ -932,6 +1108,7 @@ export default function LifeOS({ session }) {
   const [socialSched, setSocialSched] = useState(null);
   const [kidLogistics, setKidLogistics] = useState(null);
   const [manualOpen, setManualOpen] = useState(null);
+  const [openItemId, setOpenItemId] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -988,12 +1165,23 @@ export default function LifeOS({ session }) {
   if (loading || !registry) return <div style={{ minHeight: '100vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', color: MUTED, fontFamily: "'Outfit', sans-serif" }}>Loading your life...</div>;
 
   const allItems = [];
-  Object.entries(registry).forEach(([ck, cat]) => { cat.items.forEach((item) => allItems.push({ ...item, catKey: ck })); });
-  const needsLove = allItems.filter((i) => i.status === 'needs-love');
-  const headsUp = allItems.filter((i) => i.status === 'heads-up');
-  const handled = allItems.filter((i) => i.status === 'handled');
+  Object.entries(registry).forEach(([ck, cat]) => {
+    cat.items.forEach((item) => {
+      const effectiveStatus = computeStatus(item);
+      allItems.push({ ...item, catKey: ck, effectiveStatus });
+    });
+  });
+  const needsLove = allItems.filter((i) => i.effectiveStatus === 'needs-love');
+  const headsUp = allItems.filter((i) => i.effectiveStatus === 'heads-up');
+  const handled = allItems.filter((i) => i.effectiveStatus === 'handled');
 
-  const tab = (id, label, emoji) => (<button key={id} onClick={() => { setView(id); setSelectedCat(null); }} style={{ flex: 1, padding: '10px 0', background: 'none', border: 'none', borderBottom: view === id ? `2.5px solid ${ROYAL}` : '2.5px solid transparent', fontSize: 11, fontWeight: view === id ? 600 : 400, color: view === id ? TEXT : MUTED, cursor: 'pointer' }}>{emoji} {label}</button>);
+  const tab = (id, label, emoji) => (<button key={id} onClick={() => { setView(id); setSelectedCat(null); setOpenItemId(null); }} style={{ flex: 1, padding: '10px 0', background: 'none', border: 'none', borderBottom: view === id ? `2.5px solid ${ROYAL}` : '2.5px solid transparent', fontSize: 11, fontWeight: view === id ? 600 : 400, color: view === id ? TEXT : MUTED, cursor: 'pointer' }}>{emoji} {label}</button>);
+
+  const jumpToItem = (catKey, itemId) => {
+    setView('registry');
+    setSelectedCat(catKey);
+    setOpenItemId(itemId);
+  };
 
   const today = new Date();
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -1043,10 +1231,10 @@ export default function LifeOS({ session }) {
           <div style={{ marginTop: 20 }}><SectionTitle text="Next week" /><ScheduleCard days={buildWeekView('nextWeek', { meals, exercise, socialSched, kidLogistics, custody, registry })} startCollapsed={true} /></div>
 
           {/* Needs love */}
-          {needsLove.length > 0 && <div style={{ marginTop: 20 }}><SectionTitle text={`💛 Needs some love (${needsLove.length})`} color={CORAL} />{needsLove.map((item, i) => (<div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: CARD, borderRadius: 12, marginBottom: 6, border: `1px solid ${BORDER}` }}><div><div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{item.name}</div><div style={{ fontSize: 11, color: MUTED, marginTop: 1 }}>{item.owner} · {item.next}</div></div>{item.action && <button style={{ fontSize: 11, padding: '5px 12px', borderRadius: 7, border: 'none', background: '#FEF0ED', color: CORAL, cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>🤖 {item.action}</button>}</div>))}</div>}
+          {needsLove.length > 0 && <div style={{ marginTop: 20 }}><SectionTitle text={`💛 Needs some love (${needsLove.length})`} color={CORAL} />{needsLove.map((item, i) => (<div key={i} onClick={() => jumpToItem(item.catKey, item._id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: CARD, borderRadius: 12, marginBottom: 6, border: `1px solid ${BORDER}`, cursor: 'pointer' }}><div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{item.name}</div><div style={{ fontSize: 11, color: MUTED, marginTop: 1 }}>{item.owner} · {item.next}</div></div>{item.action && <button onClick={(e) => { e.stopPropagation(); jumpToItem(item.catKey, item._id); }} style={{ fontSize: 11, padding: '5px 12px', borderRadius: 7, border: 'none', background: '#FEF0ED', color: CORAL, cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4, marginLeft: 8, flexShrink: 0 }}>🤖 {item.action}</button>}<span style={{ color: '#CDD1D9', fontSize: 12, marginLeft: 8, flexShrink: 0 }}>›</span></div>))}</div>}
 
           {/* Heads up */}
-          {headsUp.length > 0 && <div style={{ marginTop: 20 }}><SectionTitle text={`👀 Heads up (${headsUp.length})`} color={PURPLE} />{headsUp.map((item, i) => (<div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: CARD, borderRadius: 12, marginBottom: 6, border: `1px solid ${BORDER}` }}><div><div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{item.name}</div><div style={{ fontSize: 11, color: MUTED, marginTop: 1 }}>{item.owner} · {item.next}</div></div>{item.action && <button style={{ fontSize: 11, padding: '5px 12px', borderRadius: 7, border: 'none', background: '#F3EFF8', color: PURPLE, cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>🤖 {item.action}</button>}</div>))}</div>}
+          {headsUp.length > 0 && <div style={{ marginTop: 20 }}><SectionTitle text={`👀 Heads up (${headsUp.length})`} color={PURPLE} />{headsUp.map((item, i) => (<div key={i} onClick={() => jumpToItem(item.catKey, item._id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: CARD, borderRadius: 12, marginBottom: 6, border: `1px solid ${BORDER}`, cursor: 'pointer' }}><div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 500, color: TEXT }}>{item.name}</div><div style={{ fontSize: 11, color: MUTED, marginTop: 1 }}>{item.owner} · {item.next}</div></div>{item.action && <button onClick={(e) => { e.stopPropagation(); jumpToItem(item.catKey, item._id); }} style={{ fontSize: 11, padding: '5px 12px', borderRadius: 7, border: 'none', background: '#F3EFF8', color: PURPLE, cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4, marginLeft: 8, flexShrink: 0 }}>🤖 {item.action}</button>}<span style={{ color: '#CDD1D9', fontSize: 12, marginLeft: 8, flexShrink: 0 }}>›</span></div>))}</div>}
         </>)}
 
         {/* ========= SCHEDULE TAB ========= */}
@@ -1069,8 +1257,8 @@ export default function LifeOS({ session }) {
           <p style={{ fontSize: 13, color: MUTED, margin: '0 0 14px' }}>Your life's filing cabinet.</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             {Object.entries(registry).map(([key, cat]) => {
-              const nl = cat.items.filter((i) => i.status === 'needs-love').length;
-              const hu = cat.items.filter((i) => i.status === 'heads-up').length;
+              const nl = cat.items.filter((i) => computeStatus(i) === 'needs-love').length;
+              const hu = cat.items.filter((i) => computeStatus(i) === 'heads-up').length;
               const allGood = nl === 0 && hu === 0;
               const fu = cat.items.filter((i) => i.folderUrl).length;
               const cn = cat.items.reduce((a, i) => a + (i.contacts?.length || 0), 0);
@@ -1083,14 +1271,14 @@ export default function LifeOS({ session }) {
         </>)}
 
         {view === 'registry' && selectedCat && (<>
-          <button onClick={() => setSelectedCat(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, color: MUTED, marginBottom: 12 }}>← Back</button>
+          <button onClick={() => { setSelectedCat(null); setOpenItemId(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, color: MUTED, marginBottom: 12 }}>← Back</button>
           <h2 style={{ fontSize: 22, fontFamily: "'Fraunces', serif", fontWeight: 600, margin: '0 0 12px' }}>{registry[selectedCat].emoji} {registry[selectedCat].label}</h2>
           <DateFormatTip />
           {registry[selectedCat].items
-            .map((item, origIdx) => ({ item, origIdx }))
-            .sort((a, b) => STATUS_CONFIG[a.item.status].sort - STATUS_CONFIG[b.item.status].sort)
-            .map(({ item }) => (
-              <ItemRow key={item._id} item={item} onUpdate={(updated) => updateRegistryItemById(selectedCat, item._id, updated)} onDelete={() => deleteRegistryItemById(selectedCat, item._id)} />
+            .map((item, origIdx) => ({ item, origIdx, effectiveStatus: computeStatus(item) }))
+            .sort((a, b) => STATUS_CONFIG[a.effectiveStatus].sort - STATUS_CONFIG[b.effectiveStatus].sort)
+            .map(({ item, effectiveStatus }) => (
+              <ItemRow key={item._id} item={item} effectiveStatus={effectiveStatus} initialOpen={item._id === openItemId} onUpdate={(updated) => updateRegistryItemById(selectedCat, item._id, updated)} onDelete={() => deleteRegistryItemById(selectedCat, item._id)} />
             ))}
           <AddItemForm onAdd={(newItem) => addRegistryItem(selectedCat, newItem)} />
         </>)}
