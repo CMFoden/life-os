@@ -266,6 +266,171 @@ function computeStatus(item, today = new Date()) {
   return 'handled';
 }
 
+// ===========================================
+// WEEK ROLLOVER HELPERS (Phase 2.2)
+// ===========================================
+// Schedules (meals, exercise, social, kid logistics, custody) are stored as
+// { thisWeek, nextWeek }. They don't auto-advance when a real new week starts —
+// "Next week" just sits there going stale. These helpers fix that.
+//
+// On every app open:
+//   - Read week_anchor (the Monday-of-week at last open)
+//   - Compare to today's real Monday
+//   - 0 weeks elapsed   → no change
+//   - 1 week elapsed    → thisWeek ← nextWeek, nextWeek ← blank
+//   - 2+ weeks elapsed  → both blank (handles "opened app after a fortnight")
+//   - First-ever load (no anchor stored) → plant anchor at this Monday, NO roll.
+//     Live data is treated as already-correct for the current week.
+function getMondayOfWeek(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  const dow = d.getDay(); // 0=Sun ... 6=Sat
+  const daysToMonday = dow === 0 ? -6 : 1 - dow;
+  d.setDate(d.getDate() + daysToMonday);
+  return d;
+}
+function toIsoDate(d) {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+function fromIsoDate(s) {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+// Blank-week factories — match the live data shapes exactly.
+function BLANK_MEALS_WEEK() {
+  return [
+    { day: 'Sunday', meal: '', who: '—' },
+    { day: 'Monday', meal: '', who: '—' },
+    { day: 'Tuesday', meal: '', who: '—' },
+    { day: 'Wednesday', meal: '', who: '—' },
+    { day: 'Thursday', meal: '', who: '—' },
+    { day: 'Friday', meal: '', who: '—' },
+    { day: 'Saturday', meal: '', who: '—' },
+  ];
+}
+function BLANK_EXERCISE_WEEK() {
+  return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => ({ day, date: '', entries: [] }));
+}
+function BLANK_SOCIAL_WEEK() {
+  return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => ({ day, date: '', entries: [] }));
+}
+function BLANK_KID_LOGISTICS_WEEK() {
+  return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => ({ day, date: '', dropoff: '—', pickup: '—', notes: '' }));
+}
+function BLANK_CUSTODY_WEEK() {
+  return [
+    { day: 'M', loc: 'N' }, { day: 'T', loc: 'N' }, { day: 'W', loc: 'N' },
+    { day: 'T', loc: 'N' }, { day: 'F', loc: 'N' }, { day: 'S', loc: 'N' }, { day: 'S', loc: 'N' },
+  ];
+}
+// Pure shift: returns new {thisWeek, nextWeek}. weeks=1 → this←next, next←blank.
+// weeks>=2 → both blank.
+function rollWeeks(obj, weeks, blankFn) {
+  if (!obj || weeks <= 0) return obj;
+  if (weeks === 1) {
+    return { thisWeek: obj.nextWeek || blankFn(), nextWeek: blankFn() };
+  }
+  return { thisWeek: blankFn(), nextWeek: blankFn() };
+}
+// Orchestrator. Reads + writes week_anchor in Supabase. Returns the (possibly
+// rolled) data so the caller can setState with the corrected values.
+// Hardened with try/catch + console logging so failures are visible.
+// Pass { force: true } to skip the elapsed-weeks check and always do a 1-week shift.
+async function applyWeekRollover({ meals, exercise, socialSched, kidLogistics, custody, force = false }) {
+  const todayMonday = getMondayOfWeek(new Date());
+  const todayMondayIso = toIsoDate(todayMonday);
+  const passthrough = { meals, exercise, socialSched, kidLogistics, custody, rolled: false };
+
+  try {
+    // Read existing anchor. Use maybeSingle() so zero-rows returns data:null
+    // cleanly without throwing PGRST116 like .single() does.
+    const { data: anchorRow, error: readErr } = await supabase
+      .from('app_data')
+      .select('value')
+      .eq('key', 'week_anchor')
+      .maybeSingle();
+
+    if (readErr) {
+      console.error('[rollover] read error:', readErr);
+      return passthrough;
+    }
+
+    // First-ever load: plant anchor at today's Monday, no rollover.
+    // (Safe default — assumes live data is correct for the current week.)
+    // Use upsert to be idempotent if the row was created mid-flight.
+    if (!anchorRow) {
+      console.log('[rollover] no anchor found — planting at', todayMondayIso, '(no roll)');
+      const { error: insErr } = await supabase.from('app_data').upsert(
+        { key: 'week_anchor', value: { monday: todayMondayIso } },
+        { onConflict: 'key' }
+      );
+      if (insErr) console.error('[rollover] anchor plant error:', insErr);
+      return passthrough;
+    }
+
+    const storedIso = anchorRow.value?.monday;
+    if (!storedIso) {
+      console.warn('[rollover] anchor row exists but value.monday missing — re-planting at', todayMondayIso);
+      await supabase.from('app_data').upsert(
+        { key: 'week_anchor', value: { monday: todayMondayIso } },
+        { onConflict: 'key' }
+      );
+      return passthrough;
+    }
+
+    const storedMonday = fromIsoDate(storedIso);
+    const diffMs = todayMonday.getTime() - storedMonday.getTime();
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    const weeksElapsedRaw = Math.round(diffMs / weekMs); // round to handle DST drift
+    const weeksElapsed = force ? Math.max(weeksElapsedRaw, 1) : weeksElapsedRaw;
+
+    console.log('[rollover] anchor:', storedIso, '| today monday:', todayMondayIso, '| weeks elapsed:', weeksElapsedRaw, force ? '(forced → ' + weeksElapsed + ')' : '');
+
+    if (weeksElapsed <= 0) {
+      console.log('[rollover] no roll needed');
+      return passthrough;
+    }
+
+    // Roll each dataset forward
+    const rolledMeals = rollWeeks(meals, weeksElapsed, BLANK_MEALS_WEEK);
+    const rolledExercise = rollWeeks(exercise, weeksElapsed, BLANK_EXERCISE_WEEK);
+    const rolledSocial = rollWeeks(socialSched, weeksElapsed, BLANK_SOCIAL_WEEK);
+    const rolledKidLog = rollWeeks(kidLogistics, weeksElapsed, BLANK_KID_LOGISTICS_WEEK);
+    const rolledCustody = rollWeeks(custody, weeksElapsed, BLANK_CUSTODY_WEEK);
+
+    // Persist rolled data + new anchor (parallel writes)
+    const writes = await Promise.allSettled([
+      saveData('meals', rolledMeals),
+      saveData('exercise_schedule', rolledExercise),
+      saveData('social_schedule', rolledSocial),
+      saveData('kid_logistics', rolledKidLog),
+      saveData('custody', rolledCustody),
+      supabase.from('app_data').upsert({ key: 'week_anchor', value: { monday: todayMondayIso } }, { onConflict: 'key' }),
+    ]);
+    const failures = writes.filter(w => w.status === 'rejected');
+    if (failures.length) {
+      console.error('[rollover] some writes failed:', failures);
+    } else {
+      console.log('[rollover] rolled', weeksElapsed, 'week(s) and persisted');
+    }
+
+    return {
+      meals: rolledMeals,
+      exercise: rolledExercise,
+      socialSched: rolledSocial,
+      kidLogistics: rolledKidLog,
+      custody: rolledCustody,
+      rolled: true,
+    };
+  } catch (err) {
+    console.error('[rollover] unexpected error:', err);
+    return passthrough;
+  }
+}
+
 // Dynamic week view builder - aggregates data from all sources
 function buildWeekView(weekKey, { meals, exercise, socialSched, kidLogistics, custody, registry }) {
   const today = new Date();
@@ -311,9 +476,20 @@ function buildWeekView(weekKey, { meals, exercise, socialSched, kidLogistics, cu
       }
     }
 
-    // 2. Meals (dinner + cook) - handle both old (array) and new ({thisWeek, nextWeek}) shapes
+    // 2. Meals (dinner + cook) - Phase 2.2 semantic:
+    //    meals[weekKey].Sunday = the Sunday BEFORE that week's Monday.
+    //    So Mon-Sat for the rendered week pulls from meals[weekKey],
+    //    but Sunday (i === 6, end of rendered Mon-Sun week) pulls from
+    //    the NEXT stored week's Sunday entry. For 'nextWeek' render, the
+    //    week after isn't stored — Sunday meal falls back to empty silently.
     if (meals) {
-      const mealsForWeek = Array.isArray(meals) ? meals : meals[weekKey];
+      let mealsForWeek = Array.isArray(meals) ? meals : meals[weekKey];
+      if (i === 6 && !Array.isArray(meals)) {
+        // Sunday at end of rendered week → use next stored week's Sunday slot.
+        // For thisWeek render, that's meals.nextWeek; for nextWeek render,
+        // there's no week-after-next stored, so leave undefined.
+        mealsForWeek = weekKey === 'thisWeek' ? meals.nextWeek : undefined;
+      }
       if (mealsForWeek) {
         const meal = mealsForWeek.find(m => m.day === dayFull);
         if (meal && meal.meal) {
@@ -1066,15 +1242,43 @@ function ListsTab({ meals, setMeals, saveMeals, weekly, setWeekly, saveWeekly, m
   const [newItem, setNewItem] = useState('');
   const [newAisle, setNewAisle] = useState('other');
 
-  const currentMeals = meals?.[mealWeek] || [];
+  // Phase 2.2: display order Sun → Sat. Sunday represents the Sunday BEFORE
+  // this week's Monday (i.e. the Sunday that kicks off the week's dinner rhythm).
+  // Storage shape unchanged — we lookup/write by `m.day` name, not index.
+  const WEEK_ORDER_SUN_FIRST = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const rawMeals = meals?.[mealWeek] || [];
+  const currentMeals = WEEK_ORDER_SUN_FIRST
+    .map(dayName => rawMeals.find(m => m.day === dayName))
+    .filter(Boolean);
 
-  const saveMealEdit = (i) => {
-    const updatedWeek = currentMeals.map((m, j) => j === i ? { ...m, meal: mealDraft } : m);
+  // Compute the date for each row label. Sunday = the Sunday BEFORE this week's
+  // Monday (so for "thisWeek" with Monday = 27 Apr, Sunday shows as 26).
+  // For "nextWeek", Monday is 7 days later and Sunday is 6 days before that.
+  const mealDateLabels = (() => {
+    const today = new Date();
+    const dow = today.getDay();
+    const daysToMonday = dow === 0 ? -6 : 1 - dow;
+    const weekOffset = mealWeek === 'nextWeek' ? 7 : 0;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + daysToMonday + weekOffset);
+    monday.setHours(0, 0, 0, 0);
+    const labels = {};
+    // Sunday = day BEFORE this Monday
+    const sun = new Date(monday); sun.setDate(monday.getDate() - 1); labels.Sunday = sun.getDate();
+    ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].forEach((name, i) => {
+      const d = new Date(monday); d.setDate(monday.getDate() + i); labels[name] = d.getDate();
+    });
+    return labels;
+  })();
+
+  // Save by day name so reordered display doesn't break storage indexing
+  const saveMealEdit = (dayName) => {
+    const updatedWeek = rawMeals.map(m => m.day === dayName ? { ...m, meal: mealDraft } : m);
     const updated = { ...meals, [mealWeek]: updatedWeek };
     setMeals(updated); saveMeals(updated); setEditingMeal(null);
   };
-  const setCook = (i, who) => {
-    const updatedWeek = currentMeals.map((m, j) => j === i ? { ...m, who } : m);
+  const setCook = (dayName, who) => {
+    const updatedWeek = rawMeals.map(m => m.day === dayName ? { ...m, who } : m);
     const updated = { ...meals, [mealWeek]: updatedWeek };
     setMeals(updated); saveMeals(updated); setEditingCook(null);
   };
@@ -1105,19 +1309,19 @@ function ListsTab({ meals, setMeals, saveMeals, weekly, setWeekly, saveWeekly, m
         </div>
         <div style={{ background: CARD, borderRadius: 14, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
           {currentMeals.map((m, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: i < currentMeals.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
-              <span style={{ width: 32, fontSize: 11, fontWeight: 600, color: SUBTEXT, flexShrink: 0 }}>{m.day.slice(0, 3)}</span>
-              {editingMeal === i ? (
+            <div key={m.day} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: i < currentMeals.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
+              <span style={{ width: 56, fontSize: 11, fontWeight: 600, color: SUBTEXT, flexShrink: 0 }}>{m.day.slice(0, 3)} {mealDateLabels[m.day]}</span>
+              {editingMeal === m.day ? (
                 <div style={{ flex: 1, display: 'flex', gap: 6 }}>
-                  <input value={mealDraft} onChange={(e) => setMealDraft(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveMealEdit(i)} style={{ flex: 1, padding: '5px 8px', borderRadius: 6, border: `1px solid ${BORDER}`, fontSize: 13, outline: 'none' }} autoFocus />
-                  <button onClick={() => saveMealEdit(i)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: 'none', background: SAGE, color: 'white', cursor: 'pointer' }}>✓</button>
+                  <input value={mealDraft} onChange={(e) => setMealDraft(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && saveMealEdit(m.day)} style={{ flex: 1, padding: '5px 8px', borderRadius: 6, border: `1px solid ${BORDER}`, fontSize: 13, outline: 'none' }} autoFocus />
+                  <button onClick={() => saveMealEdit(m.day)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, border: 'none', background: SAGE, color: 'white', cursor: 'pointer' }}>✓</button>
                 </div>
-              ) : <span onClick={() => { setEditingMeal(i); setMealDraft(currentMeals[i].meal); setEditingCook(null); }} style={{ flex: 1, fontSize: 13, color: m.meal ? TEXT : MUTED, cursor: 'pointer', fontStyle: m.meal ? 'normal' : 'italic' }}>{m.meal || 'Tap to plan...'}</span>}
-              {editingCook === i ? (
+              ) : <span onClick={() => { setEditingMeal(m.day); setMealDraft(m.meal); setEditingCook(null); }} style={{ flex: 1, fontSize: 13, color: m.meal ? TEXT : MUTED, cursor: 'pointer', fontStyle: m.meal ? 'normal' : 'italic' }}>{m.meal || 'Tap to plan...'}</span>}
+              {editingCook === m.day ? (
                 <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                  {COOK_OPTIONS.map((opt) => (<button key={opt} onClick={() => setCook(i, opt)} style={{ fontSize: 10, padding: '3px 7px', borderRadius: 5, border: `1px solid ${BORDER}`, background: m.who === opt ? cookColor(opt) + '20' : CARD, color: cookColor(opt), cursor: 'pointer', fontWeight: 500 }}>{opt}</button>))}
+                  {COOK_OPTIONS.map((opt) => (<button key={opt} onClick={() => setCook(m.day, opt)} style={{ fontSize: 10, padding: '3px 7px', borderRadius: 5, border: `1px solid ${BORDER}`, background: m.who === opt ? cookColor(opt) + '20' : CARD, color: cookColor(opt), cursor: 'pointer', fontWeight: 500 }}>{opt}</button>))}
                 </div>
-              ) : <span onClick={() => { setEditingCook(i); setEditingMeal(null); }} style={{ fontSize: 10, color: cookColor(m.who), fontWeight: 500, cursor: 'pointer', padding: '3px 8px', borderRadius: 5, background: m.who !== '—' ? cookColor(m.who) + '15' : 'transparent' }}>{m.who !== '—' ? m.who : '+cook'}</span>}
+              ) : <span onClick={() => { setEditingCook(m.day); setEditingMeal(null); }} style={{ fontSize: 10, color: cookColor(m.who), fontWeight: 500, cursor: 'pointer', padding: '3px 8px', borderRadius: 5, background: m.who !== '—' ? cookColor(m.who) + '15' : 'transparent' }}>{m.who !== '—' ? m.who : '+cook'}</span>}
             </div>
           ))}
         </div>
@@ -1184,14 +1388,47 @@ export default function LifeOS({ session }) {
         loadData('social_schedule', DEFAULT_SOCIAL_SCHED),
         loadData('kid_logistics', DEFAULT_KID_LOGISTICS),
       ]);
-      setRegistry(r); setMeals(m); setWeekly(w); setMonthly(mo); setToBuy(tb);
-      setCustody(c); setExercise(ex); setSocialSched(so); setKidLogistics(kl);
+      // Phase 2.2: roll schedules forward if real-world weeks have elapsed
+      // since last open. First-ever load just plants the anchor (no roll).
+      const rolled = await applyWeekRollover({
+        meals: m, exercise: ex, socialSched: so, kidLogistics: kl, custody: c,
+      });
+      setRegistry(r); setMeals(rolled.meals); setWeekly(w); setMonthly(mo); setToBuy(tb);
+      setCustody(rolled.custody); setExercise(rolled.exercise);
+      setSocialSched(rolled.socialSched); setKidLogistics(rolled.kidLogistics);
       setLoading(false);
     }
     load();
   }, []);
 
   const save = useCallback(async (key, value) => { setSaving(true); await saveData(key, value); setSaving(false); }, []);
+
+  // Debug helper: force a 1-week shift right now and reload state.
+  // Useful if the auto-rollover ever silently fails again.
+  const forceRollover = useCallback(async () => {
+    const ok = window.confirm('Force a week shift now?\n\nThis week\'s schedules will be discarded.\nNext week\'s schedules will become this week\'s.\nNext week will be blanked.\n\nThis only affects: meals, exercise, social, kids, custody. Registry untouched.');
+    if (!ok) return;
+    setSaving(true);
+    try {
+      const rolled = await applyWeekRollover({
+        meals, exercise, socialSched, kidLogistics, custody, force: true,
+      });
+      if (rolled.rolled) {
+        setMeals(rolled.meals);
+        setExercise(rolled.exercise);
+        setSocialSched(rolled.socialSched);
+        setKidLogistics(rolled.kidLogistics);
+        setCustody(rolled.custody);
+        window.alert('Done. Schedules rolled forward 1 week.');
+      } else {
+        window.alert('No roll happened. Check the browser console for [rollover] log lines to see why.');
+      }
+    } catch (err) {
+      console.error('[forceRollover] error:', err);
+      window.alert('Roll failed. Check browser console for details.');
+    }
+    setSaving(false);
+  }, [meals, exercise, socialSched, kidLogistics, custody]);
 
   const updateRegistryItemById = useCallback((catKey, itemId, updatedItem) => {
     setRegistry((prev) => {
@@ -1461,6 +1698,19 @@ export default function LifeOS({ session }) {
               );
             });
           })()}
+          <div style={{ marginTop: 24, padding: 14, background: CARD, border: `1px dashed ${BORDER}`, borderRadius: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: MUTED, marginBottom: 6 }}>Debug</div>
+            <div style={{ fontSize: 12, color: SUBTEXT, lineHeight: 1.45, marginBottom: 10 }}>
+              If "next week" didn't auto-roll into "this week" on a Monday, you can force it from here. This shifts schedules forward by one week.
+            </div>
+            <button
+              onClick={forceRollover}
+              disabled={saving}
+              style={{ fontSize: 13, fontWeight: 500, padding: '9px 14px', borderRadius: 8, border: `1px solid ${BORDER}`, background: BG, color: TEXT, cursor: saving ? 'wait' : 'pointer' }}
+            >
+              🔄 Force roll week
+            </button>
+          </div>
         </>)}
       </div>
     </div>
