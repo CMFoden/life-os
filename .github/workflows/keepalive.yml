@@ -1,0 +1,24 @@
+name: Supabase Keep-Alive
+
+# Pings the Supabase project once a day so the free tier never auto-pauses.
+# Free projects sleep after ~7 days of no database activity. Daily gives margin.
+
+on:
+  schedule:
+    - cron: '37 5 * * *'   # daily at 05:37 UTC (07:37 Cape Town)
+  workflow_dispatch:         # lets you run it manually from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://otqhrpbxhxkrhrnjqbba.supabase.co/rest/v1/app_data?select=key&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}")
+          echo "Supabase responded with HTTP $code"
+          if [ "$code" = "000" ]; then
+            echo "No response from Supabase. Project may be unreachable."
+            exit 1
+          fi
