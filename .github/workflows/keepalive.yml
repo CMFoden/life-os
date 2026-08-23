@@ -1,7 +1,8 @@
 name: Supabase Keep-Alive
 
 # Pings the Supabase project once a day so the free tier never auto-pauses.
-# Free projects sleep after ~7 days of no database activity. Daily gives margin.
+# Requires a real HTTP 200. A 401 means the key was rejected and does NOT
+# count as keep-alive activity, so we fail loudly on anything that isn't 200.
 
 on:
   schedule:
@@ -16,9 +17,12 @@ jobs:
         run: |
           code=$(curl -s -o /dev/null -w "%{http_code}" \
             "https://otqhrpbxhxkrhrnjqbba.supabase.co/rest/v1/app_data?select=key&limit=1" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}")
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
           echo "Supabase responded with HTTP $code"
-          if [ "$code" = "000" ]; then
-            echo "No response from Supabase. Project may be unreachable."
+          if [ "$code" != "200" ]; then
+            echo "Keep-alive FAILED: expected 200, got $code."
+            echo "A 401 means the key was rejected. Re-check the SUPABASE_ANON_KEY secret."
             exit 1
           fi
+          echo "Keep-alive OK. Project pinged and awake."
